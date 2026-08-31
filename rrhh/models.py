@@ -8,3 +8,7 @@ class Empleado(models.Model):
     
     def __str__(self):
         return self.nombre_completo
+    
+    class Meta:
+        # Ordena los resultados por "salario" en orden descendente "-"
+        ordering = ['-salario']
