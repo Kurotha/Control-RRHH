@@ -6,12 +6,12 @@ class Empleado(models.Model):
     puesto = models.CharField(max_length=50)
     salario = models.FloatField()
     estado_laboral = models.BooleanField(default=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True) 
     
     def __str__(self):
         return self.nombre_completo
     
     class Meta:
-        # Ordena los resultados por "salario" en orden descendente "-"
         ordering = ['-salario']
         verbose_name = "Empleado"
         verbose_name_plural = "Empleados"
@@ -36,4 +36,4 @@ class AuditoriaEmpleado(models.Model):
     class Meta:
         ordering = ['-fecha_modificacion']
         verbose_name = "Auditoría de Empleado"
-        verbose_name_plural = "Auditorías de Empleados"
+        verbose_name_plural = "Auditorías de Empleados"
