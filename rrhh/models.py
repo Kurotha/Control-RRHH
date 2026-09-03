@@ -6,13 +6,15 @@ class Empleado(models.Model):
     puesto = models.CharField(max_length=50)
     salario = models.FloatField()
     estado_laboral = models.BooleanField(default=True)
-    fecha_creacion = models.DateTimeField(auto_now_add=True) 
+    fecha_creacion = models.DateTimeField(auto_now_add=True)  # ingresa de forma automática la fecha y hora del momento al ingresar datos a la base
     
     def __str__(self):
         return self.nombre_completo
     
     class Meta:
         ordering = ['-salario']
+        verbose_name = "Empleado"
+        verbose_name_plural = "Empleados"
         verbose_name = "Empleado"
         verbose_name_plural = "Empleados"
 
