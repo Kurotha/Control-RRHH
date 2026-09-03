@@ -13,6 +13,8 @@ class Empleado(models.Model):
     class Meta:
         # Ordena los resultados por "salario" en orden descendente "-"
         ordering = ['-salario']
+        verbose_name = "Empleado"
+        verbose_name_plural = "Empleados"
 
 class AuditoriaEmpleado(models.Model):
     ACCIONES = [
@@ -30,3 +32,8 @@ class AuditoriaEmpleado(models.Model):
 
     def __str__(self):
         return f"{self.accion_realizada} - {self.fecha_modificacion.strftime('%Y-%m-%d')}"
+
+    class Meta:
+        ordering = ['-fecha_modificacion']
+        verbose_name = "Auditoría de Empleado"
+        verbose_name_plural = "Auditorías de Empleados"
