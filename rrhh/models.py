@@ -12,8 +12,9 @@ class Empleado(models.Model):
         return self.nombre_completo
     
     class Meta:
-        # Ordena los resultados por "salario" en orden descendente "-"
         ordering = ['-salario']
+        verbose_name = "Empleado"
+        verbose_name_plural = "Empleados"
         verbose_name = "Empleado"
         verbose_name_plural = "Empleados"
 
