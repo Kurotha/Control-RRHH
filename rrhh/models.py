@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 class Empleado(models.Model):
     nombre_completo = models.CharField(max_length=50)
     puesto = models.CharField(max_length=50)
-    salario = models.FloatField()
+    salario = models.DecimalField(max_digits=10, decimal_places=2)
     estado_laboral = models.BooleanField(default=True)
     
     def __str__(self):
@@ -36,4 +36,4 @@ class AuditoriaEmpleado(models.Model):
     class Meta:
         ordering = ['-fecha_modificacion']
         verbose_name = "Auditoría de Empleado"
-        verbose_name_plural = "Auditorías de Empleados"
+        verbose_name_plural = "Auditorías de Empleados"
