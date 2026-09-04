@@ -18,6 +18,7 @@
         <div class="resumen-card">
             <h2>Gasto Total en Nómina Mensual (Empleados Activos)</h2>
             <div class="monto">${{ total_nomina|floatformat:2 }} USD</div>
+            <small style="color: #0369a1; display: block; margin-top: 5px;">Tipo de cambio referencial: 1 USD = ${{ tasa_dolar }} CLP</small>
         </div>
 
         <h2>Listado de Empleados (Ordenados de Mayor a Menor Salario)</h2>
@@ -39,14 +40,14 @@
                 <tr class="empleado-activo">
                     <td>{{ emp.nombre_completo }}</td>
                     <td>{{ emp.puesto }}</td>
-                    <td>${{ emp.salario|floatformat:2 }} USD</td>
+                    <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
                     <td><span class="badge badge-activo">Activo</span></td>
                 </tr>
                 {% else %}
                 <tr class="empleado-inactivo">
                     <td>{{ emp.nombre_completo }}</td>
                     <td>{{ emp.puesto }}</td>
-                    <td>${{ emp.salario|floatformat:2 }} USD</td>
+                    <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
                     <td><span class="badge badge-inactivo">Inactivo</span></td>
                 </tr>
                 {% endif %}
