@@ -4,17 +4,15 @@ from django.contrib.auth.models import User
 class Empleado(models.Model):
     nombre_completo = models.CharField(max_length=50)
     puesto = models.CharField(max_length=50)
-    salario = models.FloatField()
+    salario = models.DecimalField(max_digits=10, decimal_places=2)
     estado_laboral = models.BooleanField(default=True)
-    fecha_creacion = models.DateTimeField(auto_now_add=True)  # ingresa de forma automática la fecha y hora del momento al ingresar datos a la base
     
     def __str__(self):
         return self.nombre_completo
     
     class Meta:
+        # Ordena los resultados por "salario" en orden descendente "-"
         ordering = ['-salario']
-        verbose_name = "Empleado"
-        verbose_name_plural = "Empleados"
         verbose_name = "Empleado"
         verbose_name_plural = "Empleados"
 
