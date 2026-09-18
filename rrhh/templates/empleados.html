@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,105 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Recursos Humanos - Control de Personal</title>
-    <style>
-        /* Estilos generales y limpios */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #1e293b;
-            margin-top: 0;
-            font-size: 24px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
-        }
-
-        /* Tarjeta de Resumen para Gasto Total en Nómina */
-        .resumen-card {
-            background-color: #e0f2fe;
-            border-left: 5px solid #0284c7;
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            border-radius: 4px;
-        }
-
-        .resumen-card h2 {
-            margin: 0 0 5px 0;
-            font-size: 14px;
-            text-transform: uppercase;
-            color: #0369a1;
-            letter-spacing: 0.5px;
-        }
-
-        .resumen-card .monto {
-            font-size: 28px;
-            font-weight: bold;
-            color: #0c4a6e;
-        }
-
-        /* Tabla de Empleados */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th,
-        td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        th {
-            background-color: #f8fafc;
-            color: #475569;
-            font-weight: 600;
-        }
-
-        /* Requerimiento del Caso 6: Texto Negro para Activos y Gris Tenue para Inactivos */
-        .empleado-activo {
-            color: #000000;
-            font-weight: 500;
-        }
-
-        .empleado-inactivo {
-            color: #8c959f;
-        }
-
-        /* Badges de Estado */
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-activo {
-            background-color: #dcfce7;
-            color: #15803d;
-        }
-
-        .badge-inactivo {
-            background-color: #f1f5f9;
-            color: #64748b;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'rrhh/style.css' %}">
 </head>
 
 <body>
@@ -115,6 +18,7 @@
         <div class="resumen-card">
             <h2>Gasto Total en Nómina Mensual (Empleados Activos)</h2>
             <div class="monto">${{ total_nomina|floatformat:2 }} USD</div>
+            <small style="color: #0369a1; display: block; margin-top: 5px;">Tipo de cambio referencial: 1 USD = ${{ tasa_dolar }} CLP</small>
         </div>
 
         <h2>Listado de Empleados (Ordenados de Mayor a Menor Salario)</h2>
@@ -136,14 +40,14 @@
                 <tr class="empleado-activo">
                     <td>{{ emp.nombre_completo }}</td>
                     <td>{{ emp.puesto }}</td>
-                    <td>${{ emp.salario|floatformat:2 }} USD</td>
+                    <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
                     <td><span class="badge badge-activo">Activo</span></td>
                 </tr>
                 {% else %}
                 <tr class="empleado-inactivo">
                     <td>{{ emp.nombre_completo }}</td>
                     <td>{{ emp.puesto }}</td>
-                    <td>${{ emp.salario|floatformat:2 }} USD</td>
+                    <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
                     <td><span class="badge badge-inactivo">Inactivo</span></td>
                 </tr>
                 {% endif %}
