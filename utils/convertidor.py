@@ -15,7 +15,7 @@ class Conversor:
         data = None
         intentos = 0 #Respaldo para evitar un bucle infinito si la API se cae por completo
         
-        while data is None and intentos < 10:
+        while data is None and intentos < 3:
             fecha_str = fecha_objeto.strftime("%d-%m-%Y")
             url = f"https://mindicador.cl/api/dolar/{fecha_str}"
             try:
