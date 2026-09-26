@@ -16,7 +16,7 @@ class Manejo_fechas:
     def feriados(fecha):   
         # función que toma una fecha, extrae el año de esta y junto a la librería request consigue 
         # una lista de los feriados de ese año en un formato adaptado para NumPy     
-        fecha = manejo_fechas.normalizar_fecha(fecha)
+        fecha = Manejo_fechas.normalizar_fecha(fecha)
 
         data = None
         intentos = 0
