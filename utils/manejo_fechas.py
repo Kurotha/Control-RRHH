@@ -4,7 +4,7 @@ from datetime import datetime
 
 class Manejo_fechas:
 
-    _cache_feriados = {}
+    _cache_feriados = {} # se inicializa cache de datos en sistema para validar si ya se ha usado antes la función de feriados para ese año
     @staticmethod
     def normalizar_fecha(fecha):
         # función que normaliza las fechas ingresadas en formato día, mes, año, horas y minutos
@@ -27,7 +27,7 @@ class Manejo_fechas:
         data = None
         intentos = 0
 
-        while data is None and intentos < 3:
+        while intentos < 3:
             url = f"https://api.boostr.cl/holidays/{anio}.json"
 
             try:
@@ -53,3 +53,17 @@ class Manejo_fechas:
         dias_habiles = np.is_busday(trabajados,holidays=feriado)
 
         return np.sum(dias_habiles)
+
+    @staticmethod
+    def contar_minutos(fecha_inicio, fecha_fin):
+        # función para contar la cantidad de minutos que hay en un periodo de tiempo
+        fecha_inicio = Manejo_fechas.normalizar_fecha(fecha_inicio)
+        fecha_fin = Manejo_fechas.normalizar_fecha(fecha_fin)
+
+        if fecha_fin < fecha_inicio:
+            raise ValueError(
+                "La fecha de término no puede ser anterior a la fecha de inicio"
+                )
+        
+        diferencia = fecha_fin - fecha_inicio
+        return diferencia.total_seconds() / 60
