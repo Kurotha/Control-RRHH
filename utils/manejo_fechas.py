@@ -3,6 +3,8 @@ import numpy as np
 from datetime import datetime
 
 class Manejo_fechas:
+
+    _cache_feriados = {}
     @staticmethod
     def normalizar_fecha(fecha):
         # función que normaliza las fechas ingresadas en formato día, mes, año, horas y minutos
@@ -16,21 +18,26 @@ class Manejo_fechas:
     def feriados(fecha):   
         # función que toma una fecha, extrae el año de esta y junto a la librería request consigue 
         # una lista de los feriados de ese año en un formato adaptado para NumPy     
-        fecha = manejo_fechas.normalizar_fecha(fecha)
+        fecha = Manejo_fechas.normalizar_fecha(fecha)
+
+        anio = fecha.year
+        if anio in Manejo_fechas._cache_feriados:
+            return Manejo_fechas._cache_feriados[anio]
 
         data = None
         intentos = 0
-        anio = fecha.year
 
         while data is None and intentos < 3:
-            url = f"https://apis.digital.gob.cl/fl/feriados/{anio}"
+            url = f"https://api.boostr.cl/holidays/{anio}.json"
 
             try:
                 response = requests.get(url, timeout=5)
                 response.raise_for_status()
-                data = response.json()
+                data = response.json()["data"]
 
-                return np.array([feriado["fecha"] for feriado in data],dtype="datetime64[D]")
+                feriados_anio = np.array([feriado["date"] for feriado in data],dtype="datetime64[D]")
+                Manejo_fechas._cache_feriados[anio] = feriados_anio
+                return feriados_anio
             
             except Exception as e:
                 print(f"No se encontraron datos para el año: {anio}. Error: {e}")
