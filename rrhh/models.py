@@ -3,6 +3,7 @@ from datetime import date, datetime, time, timedelta
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Empleado(models.Model):
@@ -23,7 +24,16 @@ class Empleado(models.Model):
     direccion = models.CharField(max_length=150)
     fecha_contratacion = models.DateField()
     estado_empleado = models.BooleanField(default=True)  # True = Activo, False = Inactivo
-
+    usuario = models.OneToOneField(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='empleado',
+    )
+    rol = models.CharField(
+        max_length=10,
+        choices=[('JEFE', 'Jefe'), ('EMPLEADO', 'Empleado')],
+        default='EMPLEADO',
+    )
+    
     def __str__(self):
         return f"{self.nombre_empleado} ({self.dni})"
 
