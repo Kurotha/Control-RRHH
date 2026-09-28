@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Personas</title>
+
+    <link rel="stylesheet" href="../static/rrhh/login.css">
+
+    <!-- Iconos -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+    <main class="pagina-login">
+
+        <!-- SECCIÓN IZQUIERDA -->
+        <section class="presentacion">
+
+            <!-- Logo -->
+            <div class="logo">
+                <i class="fa-solid fa-users"></i>
+
+                <div>
+                    <h2>RRHH</h2>
+                    <p>Gestión de Personas</p>
+                </div>
+            </div>
+
+            <!-- Título -->
+            <div class="bienvenida">
+
+                <div class="linea"></div>
+
+                <h1>
+                    Personas que<br>
+                    impulsan <span>resultados</span>
+                </h1>
+
+                <p>
+                    Centraliza la información de tu equipo, gestiona procesos
+                    y construye un mejor lugar para trabajar.
+                </p>
+
+            </div>
+
+            <!-- Funciones -->
+            <div class="funciones">
+
+                <div class="tarjeta">
+                    <i class="fa-solid fa-users"></i>
+                    <h3>Empleados</h3>
+                    <p>Ficha y datos<br>personales</p>
+                </div>
+
+                <div class="tarjeta">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <h3>Asistencia</h3>
+                    <p>Registro de<br>entrada y salida</p>
+                </div>
+
+                <div class="tarjeta">
+                    <i class="fa-solid fa-coins"></i>
+                    <h3>Remuneraciones</h3>
+                    <p>Sueldos y nómina</p>
+                </div>
+
+                <div class="tarjeta">
+                    <i class="fa-solid fa-file-circle-check"></i>
+                    <h3>Permisos</h3>
+                    <p>Solicitudes<br>y aprobaciones</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SECCIÓN DERECHA -->
+        <section class="contenedor-login">
+
+            <div class="login">
+
+                <h2>Iniciar sesión</h2>
+
+                <p class="descripcion">
+                    Ingresa tus credenciales para continuar
+                </p>
+
+                <form>
+
+                    <!-- RUT -->
+                    <label for="rut">RUT</label>
+
+                    <div class="campo">
+
+                        <div class="icono-campo">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+
+                        <input
+                            type="text"
+                            id="rut"
+                            name="rut"
+                            placeholder="Ej: 12.345.678-9"
+                            required>
+                    </div>
+
+
+                    <!-- CONTRASEÑA -->
+                    <label for="password">Contraseña</label>
+
+                    <div class="campo">
+
+                        <div class="icono-campo">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Tu contraseña"
+                            required>
+
+                        <i class="fa-regular fa-eye-slash ojo"></i>
+
+                    </div>
+
+
+                    <!-- BOTÓN -->
+                    <button type="submit">
+
+                        Iniciar sesión
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+                </form>
+
+
+                <!-- MENSAJE -->
+                <div class="mensaje">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    <p>
+                        Si es tu primer ingreso, tu contraseña inicial
+                        es la que te entregó RRHH.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
