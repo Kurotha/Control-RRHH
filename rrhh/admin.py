@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Empleado, AuditoriaEmpleado
+from .models import (
+    Empleado, AuditoriaEmpleado, Departamento, Puesto,
+    EmpleadoPuesto, Salario, Asistencia, Permiso, Evaluacion,
+)
 
 
 class EmpleadoAdmin(admin.ModelAdmin):
@@ -99,6 +102,13 @@ class AuditoriaEmpleadoAdmin(admin.ModelAdmin):
 # Registrar los modelos con sus clases de administración correspondientes
 admin.site.register(Empleado, EmpleadoAdmin)
 admin.site.register(AuditoriaEmpleado, AuditoriaEmpleadoAdmin)
+admin.site.register(Departamento)
+admin.site.register(Puesto)
+admin.site.register(EmpleadoPuesto)
+admin.site.register(Salario)
+admin.site.register(Asistencia)
+admin.site.register(Permiso)
+admin.site.register(Evaluacion)
 
 # Personalización de títulos del Panel de Administración
 admin.site.site_header = "Panel de Control - Gestión de Recursos Humanos"
