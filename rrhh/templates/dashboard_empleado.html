@@ -1,1 +1,740 @@
-<h1>Bienvenido, Empleado</h1>
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Portal del Empleado</title>
+
+    <link rel="stylesheet" href="{% static 'rrhh/dashboard.css' %}">
+</head>
+
+<body>
+
+<div class="panel">
+
+    <!-- =========================================
+         MENÚ LATERAL
+         ========================================= -->
+
+    <aside class="menu">
+
+        <h2>Portal del Empleado</h2>
+
+        <nav>
+
+            <a href="?seccion=info"
+               class="{% if seccion == 'info' or not seccion %}activo{% endif %}">
+                Mi información
+            </a>
+
+            <a href="?seccion=permisos"
+               class="{% if seccion == 'permisos' %}activo{% endif %}">
+                Mis permisos
+            </a>
+
+            <a href="?seccion=asistencia"
+               class="{% if seccion == 'asistencia' %}activo{% endif %}">
+                Mi asistencia
+            </a>
+
+            <a href="?seccion=sueldos"
+               class="{% if seccion == 'sueldos' %}activo{% endif %}">
+                Mis sueldos
+            </a>
+
+            <a href="?seccion=evaluaciones"
+               class="{% if seccion == 'evaluaciones' %}activo{% endif %}">
+                Mis evaluaciones
+            </a>
+
+        </nav>
+
+
+        <!-- CERRAR SESIÓN -->
+
+        <form method="post" action="{% url 'logout' %}">
+
+            {% csrf_token %}
+
+            <button type="submit" class="btn-salir">
+                Cerrar sesión
+            </button>
+
+        </form>
+
+    </aside>
+
+
+    <!-- =========================================
+         CONTENIDO
+         ========================================= -->
+
+    <main class="contenido">
+
+
+        <!-- AVISOS -->
+
+        {% for mensaje in messages %}
+
+        <div class="aviso aviso-{{ mensaje.tags }}">
+            {{ mensaje }}
+        </div>
+
+        {% endfor %}
+
+
+
+        <!-- =====================================
+             MI INFORMACIÓN
+             ===================================== -->
+
+        {% if seccion == 'info' or not seccion %}
+
+        <h1>Mi información</h1>
+
+
+        <div class="ficha-empleado">
+
+            <div class="encabezado-ficha">
+
+                <div class="avatar">
+                    {{ empleado.nombre_empleado|slice:":1" }}
+                </div>
+
+                <div>
+
+                    <h2>{{ empleado.nombre_empleado }}</h2>
+
+                    {% if puesto_actual %}
+
+                    <p>
+                        {{ puesto_actual.id_puesto.nombre_puesto }}
+                    </p>
+
+                    {% else %}
+
+                    <p>Sin puesto asignado</p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="datos-empleado">
+
+
+                <!-- RUT -->
+
+                <div class="dato">
+
+                    <span>RUT</span>
+
+                    <strong>
+                        {{ empleado.dni }}
+                    </strong>
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="dato">
+
+                    <span>Email</span>
+
+                    <strong>
+                        {{ empleado.email }}
+                    </strong>
+
+                </div>
+
+
+                <!-- TELÉFONO -->
+
+                <div class="dato">
+
+                    <span>Teléfono</span>
+
+                    <strong>
+                        {{ empleado.telefono }}
+                    </strong>
+
+                </div>
+
+
+                <!-- DIRECCIÓN -->
+
+                <div class="dato">
+
+                    <span>Dirección</span>
+
+                    <strong>
+                        {{ empleado.direccion }}
+                    </strong>
+
+                </div>
+
+
+                <!-- FECHA NACIMIENTO -->
+
+                <div class="dato">
+
+                    <span>Fecha de nacimiento</span>
+
+                    <strong>
+                        {{ empleado.fecha_nacimiento|date:"d-m-Y" }}
+                    </strong>
+
+                </div>
+
+
+                <!-- FECHA CONTRATACIÓN -->
+
+                <div class="dato">
+
+                    <span>Fecha de contratación</span>
+
+                    <strong>
+                        {{ empleado.fecha_contratacion|date:"d-m-Y" }}
+                    </strong>
+
+                </div>
+
+
+                <!-- ESTADO -->
+
+                <div class="dato">
+
+                    <span>Estado</span>
+
+                    {% if empleado.activo %}
+
+                    <strong class="estado estado-activo">
+                        Activo
+                    </strong>
+
+                    {% else %}
+
+                    <strong class="estado estado-inactivo">
+                        Inactivo
+                    </strong>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- INFORMACIÓN DEL PUESTO -->
+
+                {% if puesto_actual %}
+
+
+                <div class="dato">
+
+                    <span>Puesto</span>
+
+                    <strong>
+                        {{ puesto_actual.id_puesto.nombre_puesto }}
+                    </strong>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <span>Departamento</span>
+
+                    <strong>
+                        {{ puesto_actual.id_puesto.nombre_departamento }}
+                    </strong>
+
+                </div>
+
+
+                <div class="dato">
+
+                    <span>Nivel</span>
+
+                    <strong>
+                        {{ puesto_actual.id_puesto.nivel }}
+                    </strong>
+
+                </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+
+        {% endif %}
+
+
+
+        <!-- =====================================
+             MIS PERMISOS
+             ===================================== -->
+
+        {% if seccion == 'permisos' %}
+
+        <h1>Mis permisos</h1>
+
+
+        <!-- FORMULARIO PARA SOLICITAR PERMISO -->
+
+        <div class="bloque-permiso">
+
+            <div class="formulario">
+
+                <h2>Solicitar permiso</h2>
+
+                <p class="texto-secundario">
+                    Completa los datos para enviar una nueva solicitud.
+                </p>
+
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+
+                    <!-- TIPO -->
+
+                    <label for="tipo">
+                        Tipo de permiso
+                    </label>
+
+                    <input
+                        type="text"
+                        id="tipo"
+                        name="tipo"
+                        maxlength="50"
+                        placeholder="Ej: Permiso personal"
+                        required>
+
+
+                    <!-- FECHA INICIO -->
+
+                    <label for="fecha_inicio">
+                        Fecha de inicio
+                    </label>
+
+                    <input
+                        type="date"
+                        id="fecha_inicio"
+                        name="fecha_inicio"
+                        required>
+
+
+                    <!-- FECHA FIN -->
+
+                    <label for="fecha_fin">
+                        Fecha de fin
+                    </label>
+
+                    <input
+                        type="date"
+                        id="fecha_fin"
+                        name="fecha_fin"
+                        required>
+
+
+                    <!-- BOTÓN -->
+
+                    <button
+                        type="submit"
+                        name="accion"
+                        value="solicitar"
+                        class="btn-guardar">
+
+                        Enviar solicitud
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- HISTORIAL DE PERMISOS -->
+
+        <h2 class="titulo-secundario">
+            Historial de solicitudes
+        </h2>
+
+
+        {% if permisos %}
+
+        <table>
+
+            <tr>
+
+                <th>Tipo</th>
+
+                <th>Desde</th>
+
+                <th>Hasta</th>
+
+                <th>Días hábiles</th>
+
+                <th>Estado</th>
+
+            </tr>
+
+
+            {% for p in permisos %}
+
+            <tr>
+
+                <td>
+                    {{ p.tipo }}
+                </td>
+
+
+                <td>
+                    {{ p.fecha_inicio_permiso|date:"d-m-Y" }}
+                </td>
+
+
+                <td>
+                    {{ p.fecha_fin_permiso|date:"d-m-Y" }}
+                </td>
+
+
+                <td>
+                    {{ p.dias }}
+                </td>
+
+
+                <td>
+
+                    {% if p.aprobado == None %}
+
+                    <span class="estado estado-pendiente">
+                        Pendiente
+                    </span>
+
+
+                    {% elif p.aprobado %}
+
+                    <span class="estado estado-aprobado">
+                        Aprobado
+                    </span>
+
+
+                    {% else %}
+
+                    <span class="estado estado-rechazado">
+                        Rechazado
+                    </span>
+
+
+                    {% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+
+        {% else %}
+
+
+        <div class="sin-datos">
+            Aún no tienes permisos registrados.
+        </div>
+
+
+        {% endif %}
+
+
+        {% endif %}
+
+
+
+        <!-- =====================================
+             MI ASISTENCIA
+             ===================================== -->
+
+        {% if seccion == 'asistencia' %}
+
+        <h1>Mi asistencia</h1>
+
+
+        <p class="texto-seccion">
+            Últimos 30 registros de asistencia.
+        </p>
+
+
+        {% if asistencias %}
+
+        <table>
+
+            <tr>
+
+                <th>Fecha</th>
+
+                <th>Entrada</th>
+
+                <th>Salida</th>
+
+                <th>Minutos trabajados</th>
+
+                <th>Estado</th>
+
+            </tr>
+
+
+            {% for a in asistencias %}
+
+            <tr>
+
+
+                <td>
+                    {{ a.fecha|date:"d-m-Y" }}
+                </td>
+
+
+                <td>
+                    {{ a.hora_entrada|time:"H:i"|default:"—" }}
+                </td>
+
+
+                <td>
+                    {{ a.hora_salida|time:"H:i"|default:"—" }}
+                </td>
+
+
+                <td>
+                    {{ a.minutos_trabajados }}
+                </td>
+
+
+                <td>
+                    {{ a.estado_asistencia }}
+                </td>
+
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+
+        {% else %}
+
+
+        <div class="sin-datos">
+            Aún no tienes registros de asistencia.
+        </div>
+
+
+        {% endif %}
+
+
+        {% endif %}
+
+
+
+        <!-- =====================================
+             MIS SUELDOS
+             ===================================== -->
+
+        {% if seccion == 'sueldos' %}
+
+        <h1>Mis sueldos</h1>
+
+
+        <p class="texto-seccion">
+            Historial de liquidaciones registradas.
+        </p>
+
+
+        {% if sueldos %}
+
+        <table>
+
+            <tr>
+
+                <th>Mes</th>
+
+                <th>Sueldo base</th>
+
+                <th>Bonificación</th>
+
+                <th>Descuentos</th>
+
+                <th>Neto</th>
+
+                <th>Pagado</th>
+
+            </tr>
+
+
+            {% for sueldo in sueldos %}
+
+            <tr>
+
+
+                <td>
+                    {{ sueldo.mes_anio }}
+                </td>
+
+
+                <td>
+                    ${{ sueldo.salario_base|floatformat:"0g" }}
+                </td>
+
+
+                <td>
+                    ${{ sueldo.bonificacion|floatformat:"0g" }}
+                </td>
+
+
+                <td>
+                    ${{ sueldo.descuentos|floatformat:"0g" }}
+                </td>
+
+
+                <td class="sueldo-neto">
+                    ${{ sueldo.neto|floatformat:"0g" }}
+                </td>
+
+
+                <td>
+
+                    {% if sueldo.pagado %}
+
+                    <span class="estado estado-aprobado">
+                        Sí
+                    </span>
+
+                    {% else %}
+
+                    <span class="estado estado-pendiente">
+                        No
+                    </span>
+
+                    {% endif %}
+
+                </td>
+
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+
+        {% else %}
+
+
+        <div class="sin-datos">
+            Aún no tienes liquidaciones registradas.
+        </div>
+
+
+        {% endif %}
+
+
+        {% endif %}
+
+
+
+        <!-- =====================================
+             MIS EVALUACIONES
+             ===================================== -->
+
+        {% if seccion == 'evaluaciones' %}
+
+        <h1>Mis evaluaciones</h1>
+
+
+        <p class="texto-seccion">
+            Historial de evaluaciones de desempeño.
+        </p>
+
+
+        {% if evaluaciones %}
+
+        <table>
+
+            <tr>
+
+                <th>Período</th>
+
+                <th>Puntuación</th>
+
+                <th>Feedback</th>
+
+            </tr>
+
+
+            {% for evaluacion in evaluaciones %}
+
+            <tr>
+
+
+                <td>
+                    {{ evaluacion.periodo }}
+                </td>
+
+
+                <td>
+
+                    <span class="puntuacion">
+                        {{ evaluacion.puntuacion }}/5
+                    </span>
+
+                </td>
+
+
+                <td>
+                    {{ evaluacion.feedback }}
+                </td>
+
+
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+
+        {% else %}
+
+
+        <div class="sin-datos">
+            Aún no tienes evaluaciones registradas.
+        </div>
+
+
+        {% endif %}
+
+
+        {% endif %}
+
+
+    </main>
+
+</div>
+
+</body>
+
+</html>
