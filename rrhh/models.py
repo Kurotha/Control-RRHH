@@ -14,13 +14,20 @@ class Empleado(models.Model):
         ('NO_DECIR', 'Prefiero no decirlo'),
     ]
 
-    dni = models.CharField(max_length=12, primary_key=True)
+    dni = models.CharField(
+        max_length=12,
+        primary_key=True,
+        validators=[RegexValidator(r'^\d{1,8}-[\dkK]$', "Ingresa un RUT válido, sin puntos, ej: 12345678-9.")],
+    )
     nombre_empleado = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     fecha_nacimiento = models.DateField()
     genero = models.CharField(max_length=10, choices=GENEROS)
     genero_otro = models.CharField(max_length=50, blank=True)  # opcional, para especificar si elige "Otro"
-    telefono = models.CharField(max_length=20)
+    telefono = models.CharField(
+        max_length=20,
+        validators=[RegexValidator(r'^9\d{8}$', "Formato incorrecto. Ejemplo: 922855342.")],
+    )
     direccion = models.CharField(max_length=150)
     fecha_contratacion = models.DateField()
     estado_empleado = models.BooleanField(default=True)  # True = Activo, False = Inactivo
