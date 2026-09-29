@@ -1,150 +1,623 @@
-* { box-sizing: border-box; }
+/* =========================================
+   CONFIGURACIÓN GENERAL
+   ========================================= */
+
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f9;
-    color: #333;
+
+    background-color: #f5f6fa;
+    color: #1e293b;
 }
 
-.panel { display: flex; min-height: 100vh; }
 
-/* Menú lateral */
+/* =========================================
+   ESTRUCTURA PRINCIPAL
+   ========================================= */
+
+.panel {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* =========================================
+   MENÚ LATERAL
+   ========================================= */
+
 .menu {
-    width: 220px;
-    background-color: #1e293b;
-    color: #ffffff;
-    padding: 20px 0;
+    width: 240px;
+    height: 100vh;
+
+    padding: 28px 0 20px;
+
     display: flex;
     flex-direction: column;
+
     position: sticky;
     top: 0;
-    height: 100vh;
+
+    background: #111936;
+    color: white;
+
+    box-shadow: 4px 0 20px rgba(15, 23, 42, 0.08);
 }
-.menu h2 { margin: 0 20px 20px; font-size: 18px; }
-.menu nav { flex: 1; }
+
+
+/* Título del menú */
+
+.menu h2 {
+    margin: 0 22px 30px;
+
+    font-size: 20px;
+    font-weight: 700;
+}
+
+
+/* Línea decorativa debajo del título */
+
+.menu h2::after {
+    content: "";
+
+    display: block;
+
+    width: 38px;
+    height: 4px;
+
+    margin-top: 12px;
+
+    background-color: #7c3aed;
+    border-radius: 5px;
+}
+
+
+/* Navegación */
+
+.menu nav {
+    flex: 1;
+}
+
 .menu nav a {
     display: block;
-    padding: 12px 20px;
+
+    margin: 5px 12px;
+    padding: 13px 16px;
+
     color: #cbd5e1;
+
     text-decoration: none;
+    font-size: 15px;
+
+    border-radius: 8px;
+
+    transition: 0.2s;
 }
-.menu nav a:hover { background-color: #334155; color: #ffffff; }
-.menu nav a.activo { background-color: #0284c7; color: #ffffff; font-weight: 600; }
-.menu form { padding: 0 20px; }
+
+
+/* Hover */
+
+.menu nav a:hover {
+    background-color: rgba(124, 58, 237, 0.15);
+    color: white;
+}
+
+
+/* Sección seleccionada */
+
+.menu nav a.activo {
+    background-color: #7c3aed;
+    color: white;
+
+    font-weight: 600;
+
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+
+/* Formulario cerrar sesión */
+
+.menu form {
+    padding: 0 15px;
+}
+
+
+/* Botón cerrar sesión */
 
 .btn-salir {
     width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #dc2626;
-    color: #ffffff;
-    font-size: 14px;
-    cursor: pointer;
-}
-.btn-salir:hover { background-color: #b91c1c; }
 
-/* Contenido */
-.contenido { flex: 1; padding: 25px; }
-.contenido h1 {
-    margin-top: 0;
-    color: #1e293b;
-    font-size: 24px;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 10px;
-}
+    padding: 11px;
 
-table { width: 100%; border-collapse: collapse; background-color: #ffffff; }
-th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-th { background-color: #f8fafc; color: #475569; font-weight: 600; }
-
-.btn-aprobar, .btn-rechazar {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    color: #ffffff;
-    cursor: pointer;
-}
-.btn-aprobar { background-color: #16a34a; }
-.btn-rechazar { background-color: #dc2626; }
-
-/* Avisos de confirmación */
-.aviso { padding: 12px 15px; border-radius: 4px; margin-bottom: 20px; }
-.aviso-success { background-color: #dcfce7; color: #15803d; }
-.aviso-error { background-color: #fee2e2; color: #b91c1c; }
-
-/* Formulario de evaluación */
-.formulario {
-    max-width: 500px;
-    background-color: #ffffff;
-    padding: 20px;
+    border: 1px solid #475569;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    background-color: transparent;
+    color: #e2e8f0;
+
+    font-size: 14px;
+
+    cursor: pointer;
 }
-.formulario label { display: block; margin: 15px 0 5px; font-weight: 600; color: #475569; }
-.formulario input, .formulario select, .formulario textarea {
+
+.btn-salir:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: white;
+}
+
+
+/* =========================================
+   CONTENIDO PRINCIPAL
+   ========================================= */
+
+.contenido {
+    flex: 1;
+
+    padding: 35px 40px;
+
+    overflow-x: auto;
+}
+
+
+/* Títulos */
+
+.contenido h1 {
+    margin: 0 0 25px;
+
+    padding-bottom: 14px;
+
+    color: #111936;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+/* Línea morada pequeña */
+
+.contenido h1::after {
+    content: "";
+
+    display: block;
+
+    width: 45px;
+    height: 4px;
+
+    margin-top: 12px;
+
+    background-color: #7c3aed;
+    border-radius: 5px;
+}
+
+
+/* =========================================
+   TABLAS
+   ========================================= */
+
+table {
     width: 100%;
-    padding: 10px;
+
+    border-collapse: separate;
+    border-spacing: 0;
+
+    background-color: white;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+}
+
+
+/* Encabezado */
+
+th {
+    padding: 15px;
+
+    text-align: left;
+
+    background-color: #f8fafc;
+
+    color: #475569;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    border-bottom: 2px solid #ede9fe;
+}
+
+
+/* Celdas */
+
+td {
+    padding: 15px;
+
+    text-align: left;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+
+/* Hover de las filas */
+
+tr:hover td {
+    background-color: #fafaff;
+}
+
+
+/* Última fila sin borde */
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =========================================
+   BOTONES APROBAR / RECHAZAR
+   ========================================= */
+
+.btn-aprobar,
+.btn-rechazar {
+    padding: 7px 13px;
+
+    border: none;
+    border-radius: 6px;
+
+    color: white;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* Verde se mantiene porque significa aprobar */
+
+.btn-aprobar {
+    background-color: #16a34a;
+}
+
+.btn-aprobar:hover {
+    background-color: #15803d;
+}
+
+
+/* Rojo se mantiene porque significa rechazar */
+
+.btn-rechazar {
+    background-color: #dc2626;
+}
+
+.btn-rechazar:hover {
+    background-color: #b91c1c;
+}
+
+
+/* =========================================
+   AVISOS
+   ========================================= */
+
+.aviso {
+    padding: 14px 16px;
+
+    margin-bottom: 20px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+
+/* Éxito */
+
+.aviso-success {
+    background-color: #dcfce7;
+    color: #15803d;
+
+    border-left: 4px solid #16a34a;
+}
+
+
+/* Error */
+
+.aviso-error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+
+    border-left: 4px solid #dc2626;
+}
+
+
+/* =========================================
+   FORMULARIOS
+   ========================================= */
+
+.formulario {
+    width: 100%;
+    max-width: 600px;
+
+    padding: 28px;
+
+    background-color: white;
+
+    border-radius: 12px;
+
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+}
+
+
+/* Labels */
+
+.formulario label {
+    display: block;
+
+    margin: 18px 0 7px;
+
+    color: #334155;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* Inputs */
+
+.formulario input,
+.formulario select,
+.formulario textarea {
+    width: 100%;
+
+    padding: 11px 12px;
+
     border: 1px solid #cbd5e1;
-    border-radius: 4px;
+    border-radius: 7px;
+
+    background-color: white;
+
+    color: #1e293b;
+
     font-size: 14px;
     font-family: inherit;
+
+    outline: none;
 }
+
+
+/* Campo seleccionado */
+
+.formulario input:focus,
+.formulario select:focus,
+.formulario textarea:focus {
+    border-color: #7c3aed;
+
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.10);
+}
+
+
+/* Textarea */
+
+.formulario textarea {
+    resize: vertical;
+}
+
+
+/* Campo deshabilitado */
+
+.formulario input:disabled {
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+
+/* =========================================
+   BOTÓN PRINCIPAL
+   ========================================= */
+
 .btn-guardar {
     margin-top: 20px;
+
     padding: 10px 20px;
+
     border: none;
-    border-radius: 4px;
-    background-color: #0284c7;
-    color: #ffffff;
+    border-radius: 7px;
+
+    background-color: #7c3aed;
+    color: white;
+
     font-size: 14px;
+    font-weight: 600;
+
     cursor: pointer;
 }
-.btn-guardar:hover { background-color: #0369a1; }
 
-/* Selector de fecha en Asistencia */
-.filtro-fecha { margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-.filtro-fecha label { font-weight: 600; color: #475569; }
-.filtro-fecha input[type="date"] {
-    padding: 8px;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    font-size: 14px;
+.btn-guardar:hover {
+    background-color: #6d28d9;
 }
-.filtro-fecha .btn-guardar { margin-top: 0; padding: 8px 16px; }
 
-/* Pestañas dentro de una sección */
+
+/* =========================================
+   FILTRO DE FECHA
+   ========================================= */
+
+.filtro-fecha {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 22px;
+
+    padding: 15px 18px;
+
+    background-color: white;
+
+    border-radius: 10px;
+
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
+}
+
+.filtro-fecha label {
+    color: #475569;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.filtro-fecha input[type="date"] {
+    padding: 8px 10px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+}
+
+.filtro-fecha input[type="date"]:focus {
+    border-color: #7c3aed;
+}
+
+.filtro-fecha .btn-guardar {
+    margin-top: 0;
+
+    padding: 9px 18px;
+}
+
+
+/* =========================================
+   PESTAÑAS EVALUACIONES
+   ========================================= */
+
 .pestanas {
     display: flex;
-    gap: 5px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #e2e8f0;
-}
-.pestanas a {
-    padding: 10px 18px;
-    color: #475569;
-    text-decoration: none;
-    font-weight: 600;
-    border-radius: 6px 6px 0 0;
-}
-.pestanas a:hover { background-color: #e2e8f0; }
-.pestanas a.activa { background-color: #0284c7; color: #ffffff; }
 
-/* Botones de Editar / Cancelar */
-.btn-editar, .btn-cancelar {
-    display: inline-block;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 14px;
+    gap: 8px;
+
+    margin-bottom: 25px;
+
+    border-bottom: 1px solid #e2e8f0;
 }
-.btn-editar { padding: 6px 12px; background-color: #0284c7; color: #ffffff; }
-.btn-editar:hover { background-color: #0369a1; }
+
+.pestanas a {
+    padding: 11px 18px;
+
+    color: #64748b;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    border-radius: 8px 8px 0 0;
+}
+
+.pestanas a:hover {
+    color: #7c3aed;
+
+    background-color: #f5f3ff;
+}
+
+.pestanas a.activa {
+    background-color: #7c3aed;
+    color: white;
+}
+
+
+/* =========================================
+   EDITAR / CANCELAR
+   ========================================= */
+
+.btn-editar,
+.btn-cancelar {
+    display: inline-block;
+
+    border-radius: 6px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* Editar */
+
+.btn-editar {
+    padding: 7px 13px;
+
+    background-color: #7c3aed;
+    color: white;
+}
+
+.btn-editar:hover {
+    background-color: #6d28d9;
+}
+
+
+/* Cancelar */
+
 .btn-cancelar {
     margin-left: 10px;
     margin-top: 20px;
+
     padding: 10px 20px;
+
     background-color: #e2e8f0;
     color: #475569;
 }
-.formulario input:disabled { background-color: #f1f5f9; color: #64748b; }
+
+.btn-cancelar:hover {
+    background-color: #cbd5e1;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 850px) {
+
+    .panel {
+        flex-direction: column;
+    }
+
+    .menu {
+        width: 100%;
+        height: auto;
+
+        position: relative;
+    }
+
+    .menu nav {
+        display: flex;
+        flex-wrap: wrap;
+
+        padding: 0 10px 15px;
+    }
+
+    .menu nav a {
+        margin: 4px;
+    }
+
+    .contenido {
+        padding: 25px 20px;
+    }
+
+    table {
+        min-width: 700px;
+    }
+}
