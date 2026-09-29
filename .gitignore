@@ -1,5 +1,8 @@
 venv/
+venv_nuevo/
 __pycache__/
 *.pyc
 db.sqlite3
 .vscode/
+.env
+env

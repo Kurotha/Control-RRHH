@@ -15,7 +15,7 @@ class Conversor:
         data = None
         intentos = 0 #Respaldo para evitar un bucle infinito si la API se cae por completo
         
-        while data is None and intentos < 10:
+        while data is None and intentos < 3:
             fecha_str = fecha_objeto.strftime("%d-%m-%Y")
             url = f"https://mindicador.cl/api/dolar/{fecha_str}"
             try:
@@ -36,7 +36,7 @@ class Conversor:
                 data = None
                 intentos += 1
                 
-        return 940.0  # Valor de respaldo por si falla la red tras 10 intentos
+        return 940.0  # Valor de respaldo por si falla la red tras 3 intentos
 
     @classmethod
     def convertir_pesos_a_dolares(cls, valor_pesos, fecha) -> float:

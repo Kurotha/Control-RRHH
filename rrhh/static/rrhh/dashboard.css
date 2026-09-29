@@ -1,0 +1,893 @@
+/* =========================================
+   CONFIGURACIÓN GENERAL
+   ========================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    background-color: #f5f6fa;
+    color: #1e293b;
+}
+
+
+/* =========================================
+   ESTRUCTURA PRINCIPAL
+   ========================================= */
+
+.panel {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* =========================================
+   MENÚ LATERAL
+   ========================================= */
+
+.menu {
+    width: 240px;
+    height: 100vh;
+
+    padding: 28px 0 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    position: sticky;
+    top: 0;
+
+    background: #111936;
+    color: white;
+
+    box-shadow: 4px 0 20px rgba(15, 23, 42, 0.08);
+}
+
+
+/* Título del menú */
+
+.menu h2 {
+    margin: 0 22px 30px;
+
+    font-size: 20px;
+    font-weight: 700;
+}
+
+
+/* Línea decorativa debajo del título */
+
+.menu h2::after {
+    content: "";
+
+    display: block;
+
+    width: 38px;
+    height: 4px;
+
+    margin-top: 12px;
+
+    background-color: #7c3aed;
+    border-radius: 5px;
+}
+
+
+/* Navegación */
+
+.menu nav {
+    flex: 1;
+}
+
+.menu nav a {
+    display: block;
+
+    margin: 5px 12px;
+    padding: 13px 16px;
+
+    color: #cbd5e1;
+
+    text-decoration: none;
+    font-size: 15px;
+
+    border-radius: 8px;
+
+    transition: 0.2s;
+}
+
+
+/* Hover */
+
+.menu nav a:hover {
+    background-color: rgba(124, 58, 237, 0.15);
+    color: white;
+}
+
+
+/* Sección seleccionada */
+
+.menu nav a.activo {
+    background-color: #7c3aed;
+    color: white;
+
+    font-weight: 600;
+
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+
+/* Formulario cerrar sesión */
+
+.menu form {
+    padding: 0 15px;
+}
+
+
+/* Botón cerrar sesión */
+
+.btn-salir {
+    width: 100%;
+
+    padding: 11px;
+
+    border: 1px solid #475569;
+    border-radius: 8px;
+
+    background-color: transparent;
+    color: #e2e8f0;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.btn-salir:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+    color: white;
+}
+
+
+/* =========================================
+   CONTENIDO PRINCIPAL
+   ========================================= */
+
+.contenido {
+    flex: 1;
+
+    padding: 35px 40px;
+
+    overflow-x: auto;
+}
+
+
+/* Títulos */
+
+.contenido h1 {
+    margin: 0 0 25px;
+
+    padding-bottom: 14px;
+
+    color: #111936;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+/* Línea morada pequeña */
+
+.contenido h1::after {
+    content: "";
+
+    display: block;
+
+    width: 45px;
+    height: 4px;
+
+    margin-top: 12px;
+
+    background-color: #7c3aed;
+    border-radius: 5px;
+}
+
+
+/* =========================================
+   TABLAS
+   ========================================= */
+
+table {
+    width: 100%;
+
+    border-collapse: separate;
+    border-spacing: 0;
+
+    background-color: white;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+}
+
+
+/* Encabezado */
+
+th {
+    padding: 15px;
+
+    text-align: left;
+
+    background-color: #f8fafc;
+
+    color: #475569;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    border-bottom: 2px solid #ede9fe;
+}
+
+
+/* Celdas */
+
+td {
+    padding: 15px;
+
+    text-align: left;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+
+/* Hover de las filas */
+
+tr:hover td {
+    background-color: #fafaff;
+}
+
+
+/* Última fila sin borde */
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =========================================
+   BOTONES APROBAR / RECHAZAR
+   ========================================= */
+
+.btn-aprobar,
+.btn-rechazar {
+    padding: 7px 13px;
+
+    border: none;
+    border-radius: 6px;
+
+    color: white;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* Verde se mantiene porque significa aprobar */
+
+.btn-aprobar {
+    background-color: #16a34a;
+}
+
+.btn-aprobar:hover {
+    background-color: #15803d;
+}
+
+
+/* Rojo se mantiene porque significa rechazar */
+
+.btn-rechazar {
+    background-color: #dc2626;
+}
+
+.btn-rechazar:hover {
+    background-color: #b91c1c;
+}
+
+
+/* =========================================
+   AVISOS
+   ========================================= */
+
+.aviso {
+    padding: 14px 16px;
+
+    margin-bottom: 20px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+}
+
+
+/* Éxito */
+
+.aviso-success {
+    background-color: #dcfce7;
+    color: #15803d;
+
+    border-left: 4px solid #16a34a;
+}
+
+
+/* Error */
+
+.aviso-error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+
+    border-left: 4px solid #dc2626;
+}
+
+
+/* =========================================
+   FORMULARIOS
+   ========================================= */
+
+.formulario {
+    width: 100%;
+    max-width: 600px;
+
+    padding: 28px;
+
+    background-color: white;
+
+    border-radius: 12px;
+
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+}
+
+
+/* Labels */
+
+.formulario label {
+    display: block;
+
+    margin: 18px 0 7px;
+
+    color: #334155;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* Inputs */
+
+.formulario input,
+.formulario select,
+.formulario textarea {
+    width: 100%;
+
+    padding: 11px 12px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+
+    background-color: white;
+
+    color: #1e293b;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    outline: none;
+}
+
+
+/* Campo seleccionado */
+
+.formulario input:focus,
+.formulario select:focus,
+.formulario textarea:focus {
+    border-color: #7c3aed;
+
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.10);
+}
+
+
+/* Textarea */
+
+.formulario textarea {
+    resize: vertical;
+}
+
+
+/* Campo deshabilitado */
+
+.formulario input:disabled {
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+
+/* =========================================
+   BOTÓN PRINCIPAL
+   ========================================= */
+
+.btn-guardar {
+    margin-top: 20px;
+
+    padding: 10px 20px;
+
+    border: none;
+    border-radius: 7px;
+
+    background-color: #7c3aed;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.btn-guardar:hover {
+    background-color: #6d28d9;
+}
+
+
+/* =========================================
+   FILTRO DE FECHA
+   ========================================= */
+
+.filtro-fecha {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 22px;
+
+    padding: 15px 18px;
+
+    background-color: white;
+
+    border-radius: 10px;
+
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
+}
+
+.filtro-fecha label {
+    color: #475569;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.filtro-fecha input[type="date"] {
+    padding: 8px 10px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+}
+
+.filtro-fecha input[type="date"]:focus {
+    border-color: #7c3aed;
+}
+
+.filtro-fecha .btn-guardar {
+    margin-top: 0;
+
+    padding: 9px 18px;
+}
+
+
+/* =========================================
+   PESTAÑAS EVALUACIONES
+   ========================================= */
+
+.pestanas {
+    display: flex;
+
+    gap: 8px;
+
+    margin-bottom: 25px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.pestanas a {
+    padding: 11px 18px;
+
+    color: #64748b;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    border-radius: 8px 8px 0 0;
+}
+
+.pestanas a:hover {
+    color: #7c3aed;
+
+    background-color: #f5f3ff;
+}
+
+.pestanas a.activa {
+    background-color: #7c3aed;
+    color: white;
+}
+
+
+/* =========================================
+   EDITAR / CANCELAR
+   ========================================= */
+
+.btn-editar,
+.btn-cancelar {
+    display: inline-block;
+
+    border-radius: 6px;
+
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* Editar */
+
+.btn-editar {
+    padding: 7px 13px;
+
+    background-color: #7c3aed;
+    color: white;
+}
+
+.btn-editar:hover {
+    background-color: #6d28d9;
+}
+
+
+/* Cancelar */
+
+.btn-cancelar {
+    margin-left: 10px;
+    margin-top: 20px;
+
+    padding: 10px 20px;
+
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+.btn-cancelar:hover {
+    background-color: #cbd5e1;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 850px) {
+
+    .panel {
+        flex-direction: column;
+    }
+
+    .menu {
+        width: 100%;
+        height: auto;
+
+        position: relative;
+    }
+
+    .menu nav {
+        display: flex;
+        flex-wrap: wrap;
+
+        padding: 0 10px 15px;
+    }
+
+    .menu nav a {
+        margin: 4px;
+    }
+
+    .contenido {
+        padding: 25px 20px;
+    }
+
+    table {
+        min-width: 700px;
+    }
+}
+
+/* =========================================
+   PORTAL DEL EMPLEADO
+   ========================================= */
+
+
+/* FICHA DE INFORMACIÓN PERSONAL */
+
+.ficha-empleado {
+    background-color: #ffffff;
+
+    border-radius: 12px;
+
+    padding: 28px;
+
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+}
+
+
+/* Cabecera de la ficha */
+
+.encabezado-ficha {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    padding-bottom: 22px;
+    margin-bottom: 25px;
+
+    border-bottom: 1px solid #e2e8f0;
+}
+
+
+/* Avatar con inicial */
+
+.avatar {
+    width: 65px;
+    height: 65px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background-color: #7c3aed;
+
+    color: white;
+
+    font-size: 26px;
+    font-weight: bold;
+}
+
+
+.encabezado-ficha h2 {
+    margin: 0 0 5px;
+
+    color: #111936;
+
+    font-size: 22px;
+}
+
+
+.encabezado-ficha p {
+    margin: 0;
+
+    color: #64748b;
+}
+
+
+/* Datos personales */
+
+.datos-empleado {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 18px 35px;
+}
+
+
+.dato {
+    display: flex;
+    flex-direction: column;
+
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+
+.dato span:first-child {
+    margin-bottom: 5px;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+.dato strong {
+    color: #1e293b;
+
+    font-size: 15px;
+}
+
+
+/* =========================================
+   ESTADOS
+   ========================================= */
+
+.estado {
+    display: inline-block;
+
+    width: fit-content;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* Activo */
+
+.estado-activo,
+.estado-aprobado {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+
+/* Inactivo */
+
+.estado-inactivo {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+
+/* Pendiente */
+
+.estado-pendiente {
+    background-color: #fef3c7;
+    color: #b45309;
+}
+
+
+/* Rechazado */
+
+.estado-rechazado {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* =========================================
+   TEXTOS DE APOYO
+   ========================================= */
+
+.texto-seccion {
+    margin-top: -12px;
+    margin-bottom: 22px;
+
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+.texto-secundario {
+    margin: 5px 0 20px;
+
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+.titulo-secundario {
+    margin: 35px 0 15px;
+
+    color: #111936;
+
+    font-size: 19px;
+}
+
+
+/* =========================================
+   FORMULARIO DE PERMISOS
+   ========================================= */
+
+.bloque-permiso {
+    margin-bottom: 30px;
+}
+
+
+.formulario h2 {
+    margin: 0;
+
+    color: #111936;
+
+    font-size: 20px;
+}
+
+
+/* =========================================
+   MENSAJES SIN INFORMACIÓN
+   ========================================= */
+
+.sin-datos {
+    padding: 30px;
+
+    background-color: white;
+
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+
+    color: #64748b;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   SUELDOS
+   ========================================= */
+
+.sueldo-neto {
+    color: #111936;
+
+    font-weight: 700;
+}
+
+
+/* =========================================
+   EVALUACIONES
+   ========================================= */
+
+.puntuacion {
+    display: inline-block;
+
+    padding: 6px 12px;
+
+    border-radius: 20px;
+
+    background-color: #ede9fe;
+
+    color: #6d28d9;
+
+    font-weight: 700;
+}
+
+
+/* =========================================
+   RESPONSIVE EMPLEADO
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .datos-empleado {
+        grid-template-columns: 1fr;
+    }
+
+}
