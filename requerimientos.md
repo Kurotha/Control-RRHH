@@ -48,19 +48,19 @@
 
 - [ ] Cambiar estilo a empleados HTML
 
-   Avances equipo
+## Avances equipo
 
  [ ] Configurar la base de datos
 
   [ ] Mejoras en frontend de la página
 
-  [x ] Clase manejo fechas (13 funciones: formato de fechas, extraer feriados de un año, cuenta días hábiles)
+  [x] Clase manejo fechas (13 funciones: formato de fechas, extraer feriados de un año, cuenta días hábiles)
 
   [x] Rediseñar las tablas de la BD (Empleado, departamento, puesto, salario, Asistencia, Permiso, Evaluacion)
 
   [x] Conectar proyecto
 
-  [x] Definir bien la lógica del proyecto
+  [ ] Definir bien la lógica del proyecto
 
   [x] Conectarlo con modelo y template
 
