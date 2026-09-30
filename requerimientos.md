@@ -1,42 +1,32 @@
 # lista de tareas
 
-
-**Requisitos Obligatorios**
+## Requisitos Obligatorios
 
 - [ ] BD PostgreSQL online (Railway o Supabase)
 
-
 - [x] Django 4.2+ con settings.py + .env
-
 
 - [ ] CRUD completo (CREATE, READ, UPDATE, DELETE)
 
-
 - [x ] Admin Django personalizado (pruebas)
-
 
 - [ ] Autenticación: Login/Logout
 
-
 - [ ] Permisos: Usuario solo ve sus datos
-
 
 - [ ] Validación de datos
 
+- [x] CSRF tokens
 
-- [x] CSRF tokens 
-  [ ] Documentar templates
+- [ ] Documentar templates
 
 - [x].env en .gitignore
 
- -[ ] Desempeño empleados HTML, API mindicator time out 
-
-
+-[ ] Desempeño empleados HTML, API mindicator time out
 
 **Aspecto Visual [Nuevo]**
 
 - [ ]RESPONSIVE (funciona en desktop, tablet, móvil)
-
 
 - [x] MODERNO (colores coherentes, diseño limpio)
 
@@ -44,25 +34,19 @@
 
 - [ ] USABLE (navegación clara, flujo lógico)
 
-
 - [ ] Mobile-first
 
-
-
-**Git y GitHub (20 pts - Obligatorio)**
+## Git y GitHub (20 pts - Obligatorio)
 
 - [ ] Mínimo 5 commits distribuidos en tiempo
 
-
 - [ ] Mensajes descriptivos (no "fix", "asdf", etc.)
-
 
 - [ ] Repositorio PÚBLICO en GitHub
 
-
 - [ ] .env en .gitignore (nunca subir contraseña)
 
-  [ ] Cambiar estilo a empleados HTML   
+- [ ] Cambiar estilo a empleados HTML
 
    Avances equipo
 
