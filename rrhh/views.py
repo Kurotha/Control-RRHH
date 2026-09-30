@@ -257,6 +257,84 @@ def dashboard_jefe(request):
 
 @login_required
 def dashboard_empleado(request):
-    if request.user.empleado.rol != 'EMPLEADO':
+    """
+    Gestiona la vista del panel de control para un empleado autenticado.
+
+    Esta función valida el rol del usuario para asegurar el acceso correcto.
+    A través del método POST, procesa la creación de nuevas solicitudes de
+    permisos laborales. A través del método GET, consulta la base de datos
+    para renderizar el historial del empleado, filtrando la carga de datos
+    de forma dinámica según la pestaña (sección) seleccionada en la URL.
+
+    Args:
+        request (HttpRequest): El objeto que contiene la petición HTTP.
+
+    Returns:
+        HttpResponseRedirect: Redirige a 'login' si el rol es incorrecto, 
+            o recarga la página de permisos tras procesar el formulario POST.
+        HttpResponse: La plantilla renderizada 'dashboard_empleado.html' 
+            con el diccionario de contexto de datos correspondiente.
+    """
+    empleado = request.user.empleado
+
+    # Seguridad: Restringir acceso exclusivamente al rol de empleado.
+    if empleado.rol != 'EMPLEADO':
         return redirect('login')
-    return render(request, 'dashboard_empleado.html')
+
+    seccion = request.GET.get('seccion', 'info')
+
+    # Procesamiento de creación de solicitudes de permisos (CRUD: Create).
+    if request.method == 'POST' and request.POST.get('accion') == 'solicitar':
+        try:
+            nuevo_permiso = Permiso(
+                dni=empleado,
+                tipo=request.POST.get('tipo'),
+                fecha_inicio_permiso=request.POST.get('fecha_inicio'),
+                fecha_fin_permiso=request.POST.get('fecha_fin')
+            )
+            # full_clean() ejecuta las validaciones definidas en models.py.
+            nuevo_permiso.full_clean()
+            nuevo_permiso.save()
+
+            messages.success(
+                request,
+                "Solicitud de permiso enviada correctamente. "
+                "Esperando aprobación."
+            )
+        except ValidationError as error:
+            mensajes_error = ' '.join(error.messages)
+            messages.error(
+                request, 
+                f"Error en la solicitud: {mensajes_error}"
+            )
+
+        # Redirección limpia mediante PRG (Post/Redirect/Get) pattern.
+        url_redireccion = f"{reverse('dashboard_empleado')}?seccion=permisos"
+        return redirect(url_redireccion)
+
+    # Preparación del diccionario de contexto base para la plantilla.
+    contexto = {
+        'empleado': empleado,
+        'seccion': seccion,
+    }
+
+    # Carga de datos diferida (Lazy loading) según la navegación (CRUD: Read).
+    if seccion == 'info' or not seccion:
+        contexto['puesto_actual'] = empleado.historial_puestos.filter(
+            es_actual=True
+        ).first()
+
+    elif seccion == 'permisos':
+        contexto['permisos'] = empleado.permisos.all()
+
+    elif seccion == 'asistencia':
+        # Limitar la consulta a los últimos 30 registros para rendimiento.
+        contexto['asistencias'] = empleado.asistencias.all()[:30]
+
+    elif seccion == 'sueldos':
+        contexto['sueldos'] = empleado.salarios.all()
+
+    elif seccion == 'evaluaciones':
+        contexto['evaluaciones'] = empleado.evaluaciones.all()
+
+    return render(request, 'dashboard_empleado.html', contexto)
