@@ -35,25 +35,43 @@
             <tbody>
                 <!-- Bucle for exigido por la rúbrica para iterar sobre la lista de empleados -->
                 {% for emp in empleados %}
-                <!-- Condicional if exigido por la rúbrica para aplicar estilos visuales segun estado -->
-                {% if emp.estado_laboral %}
+                
+                <!-- Evaluamos emp.estado_empleado (campo real en el modelo Empleado) -->
+                {% if emp.estado_empleado %}
                 <tr class="empleado-activo">
-                    <td>{{ emp.nombre_completo }}</td>
-                    <td>{{ emp.puesto }}</td>
+                    <td><strong>{{ emp.nombre_empleado }}</strong></td>
+                    <td>
+                        {% for hp in emp.historial_puestos.all %}
+                            {% if hp.es_actual %}
+                                {{ hp.id_puesto.nombre_puesto }}
+                            {% endif %}
+                        {% empty %}
+                            Sin Puesto Asignado
+                        {% endfor %}
+                    </td>
                     <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
                     <td><span class="badge badge-activo">Activo</span></td>
                 </tr>
                 {% else %}
                 <tr class="empleado-inactivo">
-                    <td>{{ emp.nombre_completo }}</td>
-                    <td>{{ emp.puesto }}</td>
+                    <td><strong>{{ emp.nombre_empleado }}</strong></td>
+                    <td>
+                        {% for hp in emp.historial_puestos.all %}
+                            {% if hp.es_actual %}
+                                {{ hp.id_puesto.nombre_puesto }}
+                            {% endif %}
+                        {% empty %}
+                            Sin Puesto Asignado
+                        {% endfor %}
+                    </td>
                     <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
                     <td><span class="badge badge-inactivo">Inactivo</span></td>
                 </tr>
                 {% endif %}
+                
                 {% empty %}
                 <tr>
-                    <td colspan="4">No hay empleados registrados en el sistema.</td>
+                    <td colspan="4" style="text-align: center;">No hay empleados registrados en el sistema.</td>
                 </tr>
                 {% endfor %}
             </tbody>
