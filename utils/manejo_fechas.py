@@ -1,7 +1,7 @@
 """
 Módulo para el manejo y cálculo de fechas, feriados y días hábiles.
 
-Provee la clase ManejoFechas que permite normalizar fechas, consultar 
+Provee la clase Manejo_fechas que permite normalizar fechas, consultar 
 feriados mediante una API externa, contar días hábiles y calcular 
 diferencias en minutos.
 """
@@ -11,7 +11,7 @@ import numpy as np
 from datetime import datetime
 
 
-class ManejoFechas:
+class Manejo_fechas:
     """
     Clase utilitaria para operaciones y cálculos con fechas.
     
@@ -62,11 +62,11 @@ class ManejoFechas:
             np.ndarray: Arreglo de NumPy con los feriados del año en
                 formato 'datetime64[D]'. Si falla, retorna arreglo vacío.
         """
-        fecha_norm = ManejoFechas.normalizar_fecha(fecha)
+        fecha_norm = Manejo_fechas.normalizar_fecha(fecha)
         anio = fecha_norm.year
 
-        if anio in ManejoFechas._cache_feriados:
-            return ManejoFechas._cache_feriados[anio]
+        if anio in Manejo_fechas._cache_feriados:
+            return Manejo_fechas._cache_feriados[anio]
 
         data = None
         intentos = 0
@@ -83,7 +83,7 @@ class ManejoFechas:
                     [feriado["date"] for feriado in data], 
                     dtype="datetime64[D]"
                 )
-                ManejoFechas._cache_feriados[anio] = feriados_anio
+                Manejo_fechas._cache_feriados[anio] = feriados_anio
                 return feriados_anio
 
             except Exception as e:
@@ -129,8 +129,8 @@ class ManejoFechas:
         Raises:
             ValueError: Si la fecha de término es anterior a la de inicio.
         """
-        inicio = ManejoFechas.normalizar_fecha(fecha_inicio)
-        fin = ManejoFechas.normalizar_fecha(fecha_fin)
+        inicio = Manejo_fechas.normalizar_fecha(fecha_inicio)
+        fin = Manejo_fechas.normalizar_fecha(fecha_fin)
 
         if fin < inicio:
             raise ValueError(
