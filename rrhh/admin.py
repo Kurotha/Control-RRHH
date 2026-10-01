@@ -21,9 +21,16 @@ class EmpleadoAdmin(admin.ModelAdmin):
     Incluye campos de búsqueda, filtros y captura automática de
     auditoría al guardar (crear, modificar, activar o desactivar).
     """
-    list_display = ('nombre_empleado', 'estado_empleado')
-    list_filter = ('estado_empleado',)
-    search_fields = ('nombre_empleado',)
+    # Columnas visibles en la tabla principal
+    list_display = (
+        'dni', 
+        'nombre_empleado', 
+        'departamento', 
+        'puesto', 
+        'estado_empleado'
+    )
+    list_filter = ('estado_empleado', 'departamento', 'puesto')
+    search_fields = ('dni', 'nombre_empleado')
 
     def save_model(self, request, obj, form, change):
         """
