@@ -1,3 +1,12 @@
+"""
+Módulo de administración de Django para la aplicación de Recursos Humanos.
+
+Configura la interfaz del panel de administración, registrando los
+modelos principales y definiendo clases personalizadas para controlar
+la visualización, búsqueda, filtrado y el registro automático de
+auditorías al interactuar con los datos.
+"""
+
 from django.contrib import admin
 from .models import (
     Empleado, AuditoriaEmpleado, Departamento, Puesto,
@@ -8,7 +17,9 @@ from .models import (
 class EmpleadoAdmin(admin.ModelAdmin):
     """
     Configuración del modelo Empleado en el panel de administración.
-    Incluye campos de búsqueda, filtros y captura automática de auditoría al guardar.
+    
+    Incluye campos de búsqueda, filtros y captura automática de
+    auditoría al guardar (crear, modificar, activar o desactivar).
     """
     list_display = ('nombre_empleado', 'estado_empleado')
     list_filter = ('estado_empleado',)
@@ -16,8 +27,22 @@ class EmpleadoAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         """
-        Sobrescribe el método save_model para interceptar los cambios y registrar
-        automáticamente la auditoría en la base de datos con el usuario responsable.
+        Sobrescribe save_model para registrar la auditoría de cambios.
+
+        Intercepta el guardado del modelo en el administrador de Django
+        para crear automáticamente un registro en AuditoriaEmpleado,
+        vinculando la acción ('CREACION', 'EDICION', 'DESACTIVACION')
+        con el usuario responsable.
+
+        Args:
+            request (HttpRequest): La petición HTTP actual.
+            obj (Empleado): La instancia del modelo que se está guardando.
+            form (ModelForm): El formulario con los datos validados.
+            change (bool): True si se está modificando un objeto
+                existente, False si es una creación nueva.
+
+        Returns:
+            None
         """
         # Caso 1: Creación de un nuevo empleado (change es False)
         if not change:
@@ -69,7 +94,10 @@ class EmpleadoAdmin(admin.ModelAdmin):
 class AuditoriaEmpleadoAdmin(admin.ModelAdmin):
     """
     Panel de visualización del historial de auditoría de empleados.
-    Garantiza la inmutabilidad de los registros para cumplir con buenas prácticas contables y de RRHH.
+    
+    Garantiza la inmutabilidad de los registros para cumplir con
+    buenas prácticas contables y de recursos humanos. Limita las
+    acciones a solo lectura.
     """
     list_display = (
         'usuario_nombre',
@@ -91,11 +119,30 @@ class AuditoriaEmpleadoAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request):
-        """Evita la creación manual de registros de auditoría."""
+        """
+        Evita la creación manual de registros de auditoría.
+
+        Args:
+            request (HttpRequest): La petición HTTP actual.
+
+        Returns:
+            bool: Siempre retorna False.
+        """
         return False
 
     def has_delete_permission(self, request, obj=None):
-        """Evita la eliminación de registros para preservar el historial de auditoría."""
+        """
+        Evita la eliminación de registros de auditoría para
+        preservar el historial de forma inmutable.
+
+        Args:
+            request (HttpRequest): La petición HTTP actual.
+            obj (Model, optional): La instancia específica a eliminar.
+                Por defecto es None.
+
+        Returns:
+            bool: Siempre retorna False.
+        """
         return False
 
 
