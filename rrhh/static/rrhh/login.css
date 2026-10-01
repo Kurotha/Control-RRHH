@@ -379,6 +379,36 @@ button:hover {
         width: 100%;
     }
 
+    /* En pantallas chicas: marca, luego login, luego tarjetas */
+    .presentacion {
+        display: contents;
+    }
+
+    .logo,
+    .bienvenida,
+    .funciones {
+        padding-left: 6%;
+        padding-right: 6%;
+    }
+
+    .logo {
+        order: 1;
+        padding-top: 25px;
+    }
+
+    .bienvenida {
+        order: 2;
+    }
+
+    .contenedor-login {
+        order: 3;
+    }
+
+    .funciones {
+        order: 4;
+        padding-bottom: 20px;
+    }
+
     .funciones {
         grid-template-columns: repeat(2, 1fr);
     }
