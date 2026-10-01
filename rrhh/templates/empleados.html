@@ -198,6 +198,11 @@
         .text-muted {
             color: #94a3b8;
         }
+
+        /* Empleados inactivos en gris tenue */
+        .fila-inactiva td {
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
@@ -209,9 +214,9 @@
                 <i class="fa-solid fa-users-gear"></i>
                 <span>Gestión de Personas</span>
             </div>
-            <a href="{% url 'login' %}" class="btn-logout">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                Cerrar Sesión
+            <a href="{% url 'dashboard_rrhh' %}" class="btn-logout">
+                <i class="fa-solid fa-arrow-left"></i>
+                Volver al panel
             </a>
         </div>
 
@@ -241,48 +246,17 @@
                     </thead>
                     <tbody>
                         {% for emp in empleados %}
-                        <tr>
+                        <tr {% if not emp.estado_empleado %}class="fila-inactiva"{% endif %}>
+                            <td><strong>{{ emp.nombre_empleado }}</strong></td>
+                            <td>{{ emp.nombre_puesto_actual }}</td>
+                            <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
                             <td>
-                                <strong>
-        {% if emp.nombre and emp.apellido %}
-            {{ emp.nombre }} {{ emp.apellido }}
-        {% elif emp.nombre_completo %}
-            {{ emp.nombre_completo }}
-        {% else %}
-            {# Elimina el RUT numérico que aparece al final #}
-            {{ emp|stringformat:"s"|slice:":-12" }}
-        {% endif %}
-    </strong>
-</td>
-                            <td>
-                                {% if emp.puesto %}
-                                    {{ emp.puesto }}
-                                {% elif emp.cargo %}
-                                    {{ emp.cargo }}
+                                {% if emp.estado_empleado %}
+                                    <span class="badge-activo">Activo</span>
                                 {% else %}
-                                    Desarrollador / Analista
+                                    <span class="badge-inactivo">Inactivo</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if emp.salario_mensual_usd %}
-                                    ${{ emp.salario_mensual_usd|floatformat:2 }} USD
-                                {% elif emp.sueldo_usd %}
-                                    ${{ emp.sueldo_usd|floatformat:2 }} USD
-                                {% elif emp.salario %}
-                                    ${{ emp.salario|floatformat:2 }} USD
-                                {% elif emp.sueldo %}
-                                    ${{ emp.sueldo|floatformat:2 }} USD
-                                {% else %}
-                                    $2,500.00 USD
-                                {% endif %}
-                            </td>
-<td>
-    {% if emp.estado_empleado %}
-        <span class="badge-activo">Activo</span>
-    {% else %}
-        <span class="badge-inactivo">Inactivo</span>
-    {% endif %}
-</td>
                         </tr>
                         {% empty %}
                         <tr>
