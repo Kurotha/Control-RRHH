@@ -8,6 +8,7 @@ auditorías al interactuar con los datos.
 """
 
 from django.contrib import admin
+from django.db.models import OuterRef, Subquery
 from .models import (
     Empleado, AuditoriaEmpleado, Departamento, Puesto,
     EmpleadoPuesto, Salario, Asistencia, Permiso, Evaluacion,
@@ -18,19 +19,56 @@ class EmpleadoAdmin(admin.ModelAdmin):
     """
     Configuración del modelo Empleado en el panel de administración.
     
-    Incluye campos de búsqueda, filtros y captura automática de
-    auditoría al guardar (crear, modificar, activar o desactivar).
+    Utiliza subconsultas (Subquery y OuterRef) para anotar datos relacionales
+    directamente en la consulta SQL. Esto elimina el problema N+1 y permite
+    ordenar la tabla haciendo clic en las cabeceras de Puesto y Departamento.
     """
-    # Columnas visibles en la tabla principal
     list_display = (
-        'dni', 
-        'nombre_empleado', 
-        'departamento', 
-        'puesto', 
+        'dni',
+        'nombre_empleado',
+        'obtener_departamento',
+        'obtener_puesto',
+        'rol',
         'estado_empleado'
     )
-    list_filter = ('estado_empleado', 'departamento', 'puesto')
+    
+    list_filter = ('rol', 'estado_empleado')
     search_fields = ('dni', 'nombre_empleado')
+
+    def get_queryset(self, request):
+        """
+        Sobrescribe la consulta base inyectando anotaciones SQL.
+        Permite que PostgreSQL resuelva el historial de puestos en la misma
+        petición principal, habilitando el ordenamiento nativo en el panel.
+        """
+        qs = super().get_queryset(request)
+        
+        # Definimos la subconsulta para buscar el puesto activo del empleado
+        puesto_activo = EmpleadoPuesto.objects.filter(
+            dni=OuterRef('pk'),
+            es_actual=True
+        )
+        
+        # Anotamos (agregamos columnas virtuales) al queryset principal
+        return qs.annotate(
+            depto_orden=Subquery(
+                puesto_activo.values('id_puesto__nombre_departamento__nombre_departamento')[:1]
+            ),
+            puesto_orden=Subquery(
+                puesto_activo.values('id_puesto__nombre_puesto')[:1]
+            )
+        )
+
+    # El atributo 'ordering' vincula esta columna visual con la anotación SQL
+    @admin.display(description='Departamento', ordering='depto_orden')
+    def obtener_departamento(self, obj):
+        """Muestra el departamento usando la columna virtual anotada."""
+        return obj.depto_orden or "Sin departamento"
+
+    @admin.display(description='Puesto', ordering='puesto_orden')
+    def obtener_puesto(self, obj):
+        """Muestra el puesto usando la columna virtual anotada."""
+        return obj.puesto_orden or "Sin puesto asignado"
 
     def save_model(self, request, obj, form, change):
         """
