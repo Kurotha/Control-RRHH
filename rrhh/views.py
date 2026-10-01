@@ -1,66 +1,89 @@
 """
 Módulo de vistas para la aplicación de Recursos Humanos en Django.
 
-Maneja la lógica de presentación y el flujo de datos entre los modelos 
+Maneja la lógica de presentación y el flujo de datos entre los modelos
 y las plantillas (templates). Incluye vistas para listar empleados con
 cálculo de nómina en divisas, gestión de autenticación (login/logout),
 y los paneles de control (dashboards) diferenciados para perfiles con
-roles de 'Jefe' y 'Empleado'.
+roles de 'Jefe', 'RRHH' y 'Empleado'.
 """
 
-from django.shortcuts import render
-from django.utils import timezone
-from django.contrib import messages
-from django.urls import reverse
-from django.core.exceptions import ValidationError
-from .models import Empleado, Permiso, Asistencia, Salario, Evaluacion
-from utils.convertidor import Conversor
 from datetime import date, datetime
-from django.core.exceptions import ObjectDoesNotExist
+
+import numpy as np
 import openpyxl
+
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils import timezone
+
+from utils.convertidor import Conversor
+from utils.manejo_fechas import Manejo_fechas
+from .models import (
+    Empleado, Permiso, Asistencia, Salario, Evaluacion,
+    Departamento, EmpleadoPuesto,
+)
 
 
+@login_required
 def listar_empleados(request):
     """
     Vista que consulta la lista de empleados, obtiene el tipo de cambio
     actual del dólar y calcula los salarios y la nómina total en USD.
-    
+
+    Solo el rol RRHH puede ver los sueldos. Los empleados se ordenan de
+    mayor a menor salario.
+
     Args:
         request (HttpRequest): Objeto con la petición web.
 
     Returns:
-        HttpResponse: Respuesta renderizada con la plantilla 'empleados.html', 
-            incluyendo la lista de empleados, la nómina total y la tasa 
+        HttpResponse: Respuesta renderizada con la plantilla 'empleados.html',
+            incluyendo la lista de empleados, la nómina total y la tasa
             de cambio actual.
+        HttpResponseRedirect: Redirige a 'login' si el usuario no es RRHH.
     """
+    # Solo RRHH puede ver sueldos
+    if not hasattr(request.user, 'empleado') or request.user.empleado.rol != 'RRHH':
+        return redirect('login')
+
     # Consulta todos los empleados de la base de datos (ordenados por el modelo)
-    empleados = Empleado.objects.all()
-    
+    empleados = list(Empleado.objects.all())
+
     # Obtenemos la tasa de cambio del dólar una sola vez para no saturar la API
     tasa_dolar = Conversor.dolar_dia(timezone.now())
-    
+
     # Calculamos el salario en USD para cada empleado y el total de la nómina
     total_nomina = 0.0
     for emp in empleados:
-        puesto_actual = emp.historial_puestos.filter(es_actual=True).first()
+        # Si ya no tiene puesto actual (inactivo), usa el último que tuvo
+        puesto_actual = (
+            emp.historial_puestos.filter(es_actual=True).first()
+            or emp.historial_puestos.first()
+        )
         salario_base = puesto_actual.id_puesto.salario_base if puesto_actual else 0
 
         emp.salario_usd = round(float(salario_base) / tasa_dolar, 2)
+        emp.nombre_puesto_actual = (
+            puesto_actual.id_puesto.nombre_puesto if puesto_actual else 'Sin puesto'
+        )
         if emp.estado_empleado:
             total_nomina += emp.salario_usd
+
+    # Ordena de mayor a menor salario (lo pide la Evaluación 1)
+    empleados.sort(key=lambda e: e.salario_usd, reverse=True)
 
     # Renderiza la plantilla HTML enviando el contexto con la lista de empleados, nómina total y tasa
     return render(request, 'empleados.html', {
         'empleados': empleados,
         'total_nomina': total_nomina,
-        'tasa_dolar': tasa_dolar
+        'tasa_dolar': tasa_dolar,
     })
-
-
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
 
 
 def login_view(request):
@@ -68,16 +91,16 @@ def login_view(request):
     Gestiona el inicio de sesión de los usuarios.
 
     Procesa las peticiones POST con RUT y contraseña. Si la autenticación
-    es exitosa, redirige al usuario al panel de control que corresponda 
-    según su rol (Jefe o Empleado).
+    es exitosa, redirige al usuario al panel de control que corresponda
+    según su rol (Jefe, RRHH o Empleado).
 
     Args:
         request (HttpRequest): Objeto con la petición web y datos del formulario.
 
     Returns:
-        HttpResponseRedirect: Redirige al dashboard correspondiente si las 
+        HttpResponseRedirect: Redirige al dashboard correspondiente si las
             credenciales son válidas.
-        HttpResponse: Renderiza 'login.html' (con error en caso de fallo, 
+        HttpResponse: Renderiza 'login.html' (con error en caso de fallo,
             o vacío si la petición es GET).
     """
     if request.method == 'POST':
@@ -87,30 +110,32 @@ def login_view(request):
 
         if usuario is not None:
             login(request, usuario)
-            
+
             # Manejo de errores (Try/except + mensajes claros)
             try:
                 # Intenta resolver la relación OneToOneField
                 if usuario.empleado.rol == 'JEFE':
                     return redirect('dashboard_jefe')
+                if usuario.empleado.rol == 'RRHH':
+                    return redirect('dashboard_rrhh')
                 return redirect('dashboard_empleado')
-                
+
             except ObjectDoesNotExist:
                 # Captura el error si el usuario no existe en la tabla Empleados
                 if usuario.is_staff or usuario.is_superuser:
                     return redirect('admin:index')
-                
+
                 # Manejo de borde: usuario sin privilegios y sin perfil
                 return render(
-                    request, 
-                    'login.html', 
+                    request,
+                    'login.html',
                     {'error': 'Cuenta sin perfil de empleado asociado.'}
                 )
 
         # Mensaje claro en caso de credenciales inválidas
         return render(
-            request, 
-            'login.html', 
+            request,
+            'login.html',
             {'error': 'RUT o contraseña incorrectos. Intenta nuevamente.'}
         )
 
@@ -149,7 +174,7 @@ def evaluacion_del_equipo(pk, equipo):
         equipo (QuerySet): Conjunto de empleados bajo el cargo del jefe.
 
     Returns:
-        Evaluacion | None: Objeto Evaluación si se encuentra y cumple las 
+        Evaluacion | None: Objeto Evaluación si se encuentra y cumple las
             condiciones; de lo contrario, None.
     """
     try:
@@ -166,14 +191,14 @@ def dashboard_jefe(request):
     Centraliza la lógica para gestionar el equipo a su cargo, aprobar o
     rechazar solicitudes de permisos, revisar asistencia, ver nóminas
     y administrar el sistema de evaluaciones del equipo (crear y editar).
-    
+
     Args:
         request (HttpRequest): Objeto con la petición web y datos de sesión.
 
     Returns:
-        HttpResponseRedirect: Redirige tras procesar formularios (POST) o si 
+        HttpResponseRedirect: Redirige tras procesar formularios (POST) o si
             el usuario no tiene los permisos del rol adecuado.
-        HttpResponse: Plantilla 'dashboard_jefe.html' con el contexto 
+        HttpResponse: Plantilla 'dashboard_jefe.html' con el contexto
             dinámico según la sección elegida por el jefe.
     """
     empleado = request.user.empleado
@@ -290,9 +315,6 @@ def dashboard_jefe(request):
         ).select_related('dni')
 
     elif seccion == 'asistencia':
-        import numpy as np
-        from utils.manejo_fechas import Manejo_fechas
-
         # Día elegido en el calendario; si no viene o es inválido, hoy
         try:
             dia = date.fromisoformat(request.GET.get('fecha', ''))
@@ -351,6 +373,110 @@ def dashboard_jefe(request):
     return render(request, 'dashboard_jefe.html', contexto)
 
 
+# ---------------------------------------------------------------------------
+# Dashboard de RRHH
+# ---------------------------------------------------------------------------
+
+SECCIONES_RRHH = [
+    ('departamentos', 'Departamentos'),
+    ('permisos', 'Próximos permisos'),
+    ('evaluaciones', 'Evaluaciones pendientes'),
+]
+
+
+@login_required
+def dashboard_rrhh(request):
+    """
+    Panel de control para usuarios con rol de RRHH.
+
+    Muestra la información de toda la empresa agrupada por departamento:
+    jefe del área, empleados activos con su sueldo, próximos permisos y
+    empleados con evaluación pendiente en el período actual.
+
+    Args:
+        request (HttpRequest): Objeto con la petición web y datos de sesión.
+
+    Returns:
+        HttpResponseRedirect: Redirige a 'login' si el usuario no es RRHH.
+        HttpResponse: Plantilla 'dashboard_rrhh.html' con el contexto
+            de la sección elegida.
+    """
+    empleado = getattr(request.user, 'empleado', None)
+    if empleado is None or empleado.rol != 'RRHH':
+        return redirect('login')
+
+    seccion = request.GET.get('seccion', 'departamentos')
+    if seccion not in dict(SECCIONES_RRHH):
+        seccion = 'departamentos'
+
+    contexto = {'secciones': SECCIONES_RRHH, 'seccion': seccion}
+
+    if seccion == 'departamentos':
+        departamentos = []
+        for depto in Departamento.objects.select_related('dni_jefe'):
+            # Empleados activos cuyo puesto actual pertenece a este departamento
+            asignaciones = EmpleadoPuesto.objects.filter(
+                es_actual=True,
+                dni__estado_empleado=True,
+                id_puesto__nombre_departamento=depto,
+            ).select_related('dni', 'id_puesto')
+
+            filas = [
+                {
+                    'empleado': a.dni,
+                    'puesto': a.id_puesto.nombre_puesto,
+                    'salario': a.id_puesto.salario_base,
+                }
+                for a in asignaciones
+            ]
+            departamentos.append({
+                'depto': depto,
+                'filas': filas,
+                'cantidad': len(filas),
+                'total': sum(f['salario'] for f in filas),
+            })
+        contexto['departamentos'] = departamentos
+
+    elif seccion == 'permisos':
+        # Departamento actual de cada empleado (por su puesto vigente)
+        depto_de = {
+            a.dni_id: a.id_puesto.nombre_departamento_id
+            for a in EmpleadoPuesto.objects.filter(es_actual=True).select_related('id_puesto')
+        }
+        # Permisos que aún no terminaron, del más próximo al más lejano
+        permisos = Permiso.objects.filter(
+            fecha_fin_permiso__gte=timezone.localdate(),
+        ).select_related('dni').order_by('fecha_inicio_permiso')
+
+        grupos = {}
+        for p in permisos:
+            nombre = depto_de.get(p.dni_id, 'Sin departamento')
+            grupos.setdefault(nombre, []).append(p)
+        contexto['permisos_por_depto'] = sorted(grupos.items())
+
+    elif seccion == 'evaluaciones':
+        hoy = timezone.localdate()
+        periodo = f"{hoy.year}-S{1 if hoy.month <= 6 else 2}"
+        evaluados = set(
+            Evaluacion.objects.filter(periodo=periodo).values_list('dni_id', flat=True)
+        )
+        # Empleados activos sin evaluación en el período, agrupados por departamento
+        grupos = {}
+        for a in EmpleadoPuesto.objects.filter(
+            es_actual=True, dni__estado_empleado=True,
+        ).select_related('dni', 'id_puesto'):
+            if a.dni_id not in evaluados:
+                grupos.setdefault(a.id_puesto.nombre_departamento_id, []).append(a.dni)
+        contexto['periodo'] = periodo
+        contexto['pendientes_por_depto'] = sorted(grupos.items())
+
+    return render(request, 'dashboard_rrhh.html', contexto)
+
+
+# ---------------------------------------------------------------------------
+# Dashboard del empleado
+# ---------------------------------------------------------------------------
+
 @login_required
 def dashboard_empleado(request):
     """
@@ -358,23 +484,24 @@ def dashboard_empleado(request):
 
     Esta función valida el rol del usuario para asegurar el acceso correcto.
     A través del método POST, procesa la creación de nuevas solicitudes de
-    permisos laborales. A través del método GET, consulta la base de datos
-    para renderizar el historial del empleado, filtrando la carga de datos
-    de forma dinámica según la pestaña (sección) seleccionada en la URL.
+    permisos laborales y el marcaje de entrada y salida. A través del método
+    GET, consulta la base de datos para renderizar el historial del empleado,
+    filtrando la carga de datos de forma dinámica según la pestaña (sección)
+    seleccionada en la URL.
 
     Args:
         request (HttpRequest): El objeto que contiene la petición HTTP.
 
     Returns:
-        HttpResponseRedirect: Redirige a 'login' si el rol es incorrecto, 
-            o recarga la página de permisos tras procesar el formulario POST.
-        HttpResponse: La plantilla renderizada 'dashboard_empleado.html' 
+        HttpResponseRedirect: Redirige a 'login' si el rol es incorrecto,
+            o recarga la página tras procesar el formulario POST.
+        HttpResponse: La plantilla renderizada 'dashboard_empleado.html'
             con el diccionario de contexto de datos correspondiente.
     """
-    empleado = request.user.empleado
+    empleado = getattr(request.user, 'empleado', None)
 
     # Seguridad: Restringir acceso exclusivamente al rol de empleado.
-    if empleado.rol != 'EMPLEADO':
+    if empleado is None or empleado.rol != 'EMPLEADO':
         return redirect('login')
 
     seccion = request.GET.get('seccion', 'info')
@@ -400,13 +527,43 @@ def dashboard_empleado(request):
         except ValidationError as error:
             mensajes_error = ' '.join(error.messages)
             messages.error(
-                request, 
+                request,
                 f"Error en la solicitud: {mensajes_error}"
             )
 
         # Redirección limpia mediante PRG (Post/Redirect/Get) pattern.
         url_redireccion = f"{reverse('dashboard_empleado')}?seccion=permisos"
         return redirect(url_redireccion)
+
+    # Marcar asistencia: entrada o salida del día (CRUD: Create / Update).
+    if request.method == 'POST' and request.POST.get('accion') in ('marcar_entrada', 'marcar_salida'):
+        ahora = timezone.localtime()
+        hoy = ahora.date()
+        hora = ahora.time().replace(second=0, microsecond=0)
+        registro = Asistencia.objects.filter(dni=empleado, fecha=hoy).first()
+
+        if request.POST.get('accion') == 'marcar_entrada':
+            if registro:
+                messages.error(request, 'Ya marcaste tu entrada hoy.')
+            else:
+                Asistencia.objects.create(
+                    dni=empleado, fecha=hoy,
+                    hora_entrada=hora, estado_asistencia='Presente',
+                )
+                messages.success(request, f'Entrada registrada a las {hora:%H:%M}.')
+        else:
+            if registro is None:
+                messages.error(request, 'Primero debes marcar tu entrada.')
+            elif registro.hora_salida:
+                messages.error(request, 'Ya marcaste tu salida hoy.')
+            elif hora <= registro.hora_entrada:
+                messages.error(request, 'La salida debe ser posterior a la entrada.')
+            else:
+                registro.hora_salida = hora
+                registro.save()  # el modelo calcula solo los minutos trabajados
+                messages.success(request, f'Salida registrada a las {hora:%H:%M}.')
+
+        return redirect(f"{reverse('dashboard_empleado')}?seccion=asistencia")
 
     # Preparación del diccionario de contexto base para la plantilla.
     contexto = {
@@ -419,6 +576,10 @@ def dashboard_empleado(request):
         contexto['puesto_actual'] = empleado.historial_puestos.filter(
             es_actual=True
         ).first()
+        # Historial completo, del más reciente al más antiguo (orden definido en el modelo)
+        contexto['historial_puestos'] = empleado.historial_puestos.select_related(
+            'id_puesto__nombre_departamento'
+        )
 
     elif seccion == 'permisos':
         contexto['permisos'] = empleado.permisos.all()
@@ -426,6 +587,10 @@ def dashboard_empleado(request):
     elif seccion == 'asistencia':
         # Limitar la consulta a los últimos 30 registros para rendimiento.
         contexto['asistencias'] = empleado.asistencias.all()[:30]
+        # Registro de hoy, para saber qué botón habilitar
+        contexto['asistencia_hoy'] = empleado.asistencias.filter(
+            fecha=timezone.localdate()
+        ).first()
 
     elif seccion == 'sueldos':
         contexto['sueldos'] = empleado.salarios.all()
@@ -435,26 +600,28 @@ def dashboard_empleado(request):
 
     return render(request, 'dashboard_empleado.html', contexto)
 
+
 @login_required
 def exportar_nomina_excel(request):
     """
     Genera y descarga un reporte en formato Excel con la nómina de empleados.
 
     Consulta la base de datos para extraer el historial de salarios de todos
-    los empleados, incluyendo bonificaciones, descuentos, el sueldo neto y 
-    el estado de pago. Retorna el archivo como una respuesta HTTP directa 
+    los empleados, incluyendo bonificaciones, descuentos, el sueldo neto y
+    el estado de pago. Retorna el archivo como una respuesta HTTP directa
     para su descarga.
 
     Args:
         request (HttpRequest): El objeto que contiene la petición HTTP.
 
     Returns:
-        HttpResponse: Respuesta HTTP con el archivo .xlsx adjunto y los 
+        HttpResponse: Respuesta HTTP con el archivo .xlsx adjunto y los
             encabezados correspondientes para forzar su descarga.
-        HttpResponseRedirect: Redirección al login si el usuario no es jefe.
+        HttpResponseRedirect: Redirección al login si el usuario no es RRHH.
     """
-    # Seguridad: Restringir la exportación exclusivamente al rol de JEFE.
-    if request.user.empleado.rol != 'JEFE':
+    # Seguridad: Restringir la exportación exclusivamente al rol de RRHH.
+    empleado = getattr(request.user, 'empleado', None)
+    if empleado is None or empleado.rol != 'RRHH':
         return redirect('login')
 
     # Crear el libro de trabajo y la hoja activa.
@@ -464,7 +631,7 @@ def exportar_nomina_excel(request):
 
     # Definir los encabezados de las columnas del reporte.
     encabezados = [
-        'RUT', 'Nombre Empleado', 'Mes/Año', 'Sueldo Base', 
+        'RUT', 'Nombre Empleado', 'Mes/Año', 'Sueldo Base',
         'Bonificación', 'Descuentos', 'Sueldo Neto', 'Estado de Pago'
     ]
     hoja.append(encabezados)
@@ -491,13 +658,31 @@ def exportar_nomina_excel(request):
     # Configurar la respuesta HTTP para forzar la descarga del archivo.
     fecha_actual = datetime.now().strftime('%Y%m%d')
     nombre_archivo = f"Reporte_Nomina_{fecha_actual}.xlsx"
-    
+
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
-    
+
     # Guardar la estructura de Excel directamente en la respuesta HTTP.
     workbook.save(response)
-    
+
     return response
+
+
+def csrf_fallo(request, reason=''):
+    """
+    Se ejecuta cuando falla la verificación CSRF: formulario viejo, o la sesión
+    cambió porque se abrió otra cuenta en el mismo navegador.
+    En vez del error 403, muestra el login con un mensaje claro.
+
+    Args:
+        request (HttpRequest): Objeto con la petición web.
+        reason (str): Motivo del fallo que entrega Django.
+
+    Returns:
+        HttpResponse: Renderiza 'login.html' con un mensaje de error.
+    """
+    return render(request, 'login.html', {
+        'error': 'Tu sesión cambió o venció. Ingresa nuevamente.'
+    })
