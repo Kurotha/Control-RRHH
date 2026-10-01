@@ -1,3 +1,12 @@
+"""
+Módulo de modelos de base de datos para el sistema de Recursos Humanos.
+
+Define la estructura de las tablas, relaciones, restricciones y 
+validaciones de la lógica de negocio para entidades como Empleado, 
+Departamento, Puesto, Salario, Asistencia, Permiso, Evaluación y 
+Auditoría.
+"""
+
 from datetime import date, datetime, time, timedelta
 
 from django.core.exceptions import ValidationError
@@ -7,6 +16,12 @@ from django.contrib.auth.models import User
 
 
 class Empleado(models.Model):
+    """
+    Modelo que representa a un empleado dentro de la empresa.
+
+    Almacena información personal, de contacto, datos contractuales, 
+    el estado laboral y vincula al empleado con su cuenta de usuario.
+    """
     GENEROS = [
         ('FEMENINO', 'Femenino'),
         ('MASCULINO', 'Masculino'),
@@ -42,6 +57,12 @@ class Empleado(models.Model):
     )
     
     def __str__(self):
+        """
+        Devuelve una representación en formato de texto del empleado.
+        
+        Returns:
+            str: Nombre del empleado seguido de su DNI.
+        """
         return f"{self.nombre_empleado} ({self.dni})"
 
     class Meta:
@@ -51,6 +72,12 @@ class Empleado(models.Model):
 
 
 class Departamento(models.Model):
+    """
+    Modelo que representa un departamento o área de la empresa.
+
+    Guarda la información de descripción, presupuesto asignado y 
+    establece la relación con el empleado que ejerce como jefe.
+    """
     nombre_departamento = models.CharField(max_length=80, primary_key=True)
     descripcion = models.TextField()
     # Si se elimina al jefe, el departamento sigue existiendo y queda sin jefe
@@ -61,6 +88,9 @@ class Departamento(models.Model):
     presupuesto = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):
+        """
+        Devuelve el nombre del departamento como su representación.
+        """
         return self.nombre_departamento
 
     class Meta:
@@ -70,6 +100,12 @@ class Departamento(models.Model):
 
 
 class Puesto(models.Model):
+    """
+    Modelo que define los cargos o puestos de trabajo disponibles.
+
+    Se asocia a un departamento específico y contiene los datos del 
+    salario base y el nivel jerárquico.
+    """
     id_puesto = models.AutoField(primary_key=True)
     nombre_puesto = models.CharField(max_length=80)
     nombre_departamento = models.ForeignKey(
@@ -80,6 +116,9 @@ class Puesto(models.Model):
     salario_base = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
+        """
+        Devuelve el nombre del puesto junto al departamento al que pertenece.
+        """
         return f"{self.nombre_puesto} - {self.nombre_departamento_id}"
 
     class Meta:
@@ -95,6 +134,12 @@ class Puesto(models.Model):
 
 
 class EmpleadoPuesto(models.Model):
+    """
+    Modelo que registra el historial de puestos ocupados por los empleados.
+
+    Permite llevar trazabilidad de las fechas en las que un empleado 
+    ocupó un cargo determinado.
+    """
     # Si se elimina el empleado, se elimina su historial. Un puesto ocupado no se puede eliminar.
     dni = models.ForeignKey(
         Empleado, on_delete=models.CASCADE,
@@ -109,10 +154,17 @@ class EmpleadoPuesto(models.Model):
     es_actual = models.BooleanField(default=True)
 
     def clean(self):
+        """
+        Valida que la fecha de finalización del puesto no sea anterior 
+        a la fecha de inicio.
+        """
         if self.fecha_fin_puesto and self.fecha_fin_puesto < self.fecha_inicio_puesto:
             raise ValidationError("La fecha de fin no puede ser anterior a la fecha de inicio.")
 
     def __str__(self):
+        """
+        Devuelve una cadena indicando el DNI del empleado y el ID del puesto.
+        """
         return f"{self.dni_id} - {self.id_puesto}"
 
     class Meta:
@@ -128,6 +180,12 @@ class EmpleadoPuesto(models.Model):
 
 
 class Salario(models.Model):
+    """
+    Modelo para gestionar los pagos y la nómina de los empleados.
+
+    Registra la base, bonificaciones, descuentos y calcula el pago 
+    neto correspondiente a un mes y año específicos.
+    """
     dni = models.ForeignKey(
         Empleado, on_delete=models.CASCADE,
         db_column='dni', related_name='salarios',
@@ -143,11 +201,18 @@ class Salario(models.Model):
     pagado = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+        """
+        Sobrescribe el método save para calcular y actualizar 
+        automáticamente el salario neto antes de guardar el registro.
+        """
         # Nómina automática: base + bonificación - descuentos = neto
         self.neto = self.salario_base + self.bonificacion - self.descuentos
         super().save(*args, **kwargs)
 
     def __str__(self):
+        """
+        Devuelve una representación que identifica al empleado y el mes de pago.
+        """
         return f"{self.dni_id} - {self.mes_anio}"
 
     class Meta:
@@ -160,6 +225,12 @@ class Salario(models.Model):
 
 
 class Asistencia(models.Model):
+    """
+    Modelo para el control de asistencia diaria de los empleados.
+
+    Registra fechas, horas de marcaje y estado, automatizando el cálculo 
+    de los minutos totales trabajados durante el turno.
+    """
     dni = models.ForeignKey(
         Empleado, on_delete=models.CASCADE,
         db_column='dni', related_name='asistencias',
@@ -171,10 +242,18 @@ class Asistencia(models.Model):
     estado_asistencia = models.CharField(max_length=50)
 
     def clean(self):
+        """
+        Garantiza la coherencia temporal verificando que la hora 
+        de salida registrada sea posterior a la de entrada.
+        """
         if self.hora_entrada and self.hora_salida and self.hora_salida <= self.hora_entrada:
             raise ValidationError("La hora de salida debe ser posterior a la hora de entrada.")
 
     def save(self, *args, **kwargs):
+        """
+        Sobrescribe el guardado para calcular automáticamente la cantidad 
+        de minutos trabajados basándose en las horas de entrada y salida.
+        """
         # Calcula los minutos trabajados a partir de la entrada y la salida
         if self.hora_entrada and self.hora_salida:
             entrada = datetime.combine(self.fecha, self.hora_entrada)
@@ -185,6 +264,9 @@ class Asistencia(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
+        """
+        Representación en texto mostrando el empleado y la fecha de asistencia.
+        """
         return f"{self.dni_id} - {self.fecha}"
 
     class Meta:
@@ -197,6 +279,12 @@ class Asistencia(models.Model):
 
 
 class Permiso(models.Model):
+    """
+    Modelo para administrar las solicitudes de permisos de empleados.
+
+    Registra las fechas del permiso y se encarga de calcular 
+    automáticamente los días hábiles efectivos de la ausencia.
+    """
     dni = models.ForeignKey(
         Empleado, on_delete=models.CASCADE,
         db_column='dni', related_name='permisos',
@@ -209,11 +297,18 @@ class Permiso(models.Model):
     aprobado = models.BooleanField(null=True, blank=True, default=None)
 
     def clean(self):
+        """
+        Asegura que el rango de fechas sea válido cronológicamente.
+        """
         if (self.fecha_inicio_permiso and self.fecha_fin_permiso
                 and self.fecha_fin_permiso < self.fecha_inicio_permiso):
             raise ValidationError("La fecha de fin no puede ser anterior a la fecha de inicio.")
 
     def save(self, *args, **kwargs):
+        """
+        Calcula dinámicamente la cantidad de días hábiles consumidos por 
+        el permiso mediante la exclusión de fines de semana y feriados.
+        """
         # Cuenta los días hábiles (sin fines de semana ni feriados) con las funciones de manejo_fechas.
         # Los imports van aquí dentro para que el proyecto no falle si numpy aún no está instalado.
         import numpy as np
@@ -235,6 +330,9 @@ class Permiso(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
+        """
+        Retorna información del empleado, tipo de permiso y su inicio.
+        """
         return f"{self.dni_id} - {self.tipo} ({self.fecha_inicio_permiso})"
 
     class Meta:
@@ -250,6 +348,12 @@ class Permiso(models.Model):
 
 
 class Evaluacion(models.Model):
+    """
+    Modelo que almacena el historial de desempeño de un empleado.
+
+    Registra las métricas o notas asignadas junto con los comentarios
+    para un período temporal determinado.
+    """
     dni = models.ForeignKey(
         Empleado, on_delete=models.CASCADE,
         db_column='dni', related_name='evaluaciones',
@@ -264,6 +368,9 @@ class Evaluacion(models.Model):
     feedback = models.TextField()
 
     def __str__(self):
+        """
+        Identifica la evaluación mostrando el empleado, periodo y nota.
+        """
         return f"{self.dni_id} - {self.periodo}: {self.puntuacion}/5"
 
     class Meta:
@@ -276,6 +383,12 @@ class Evaluacion(models.Model):
 
 
 class AuditoriaEmpleado(models.Model):
+    """
+    Modelo para el registro inmutable de acciones en el sistema.
+
+    Almacena quién hizo qué cambio, permitiendo la trazabilidad requerida
+    por estándares administrativos y de seguridad.
+    """
     ACCIONES = [
         ('CREACION', 'Creación de registro'),
         ('EDICION', 'Edición de datos'),
@@ -291,15 +404,26 @@ class AuditoriaEmpleado(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
+        """
+        Sobrescribe save para bloquear ediciones. Solo permite la 
+        creación inicial del registro de auditoría.
+        """
         # La auditoría no se edita: solo se puede crear un registro nuevo
         if self.pk is not None:
             raise ValidationError("Los registros de auditoría no se pueden editar.")
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        """
+        Sobrescribe delete para prevenir la eliminación de cualquier 
+        registro, garantizando un historial completo.
+        """
         raise ValidationError("Los registros de auditoría no se pueden eliminar.")
 
     def __str__(self):
+        """
+        Muestra la acción, la tabla y la fecha de la modificación.
+        """
         return f"{self.accion_realizada} - {self.tabla} - {self.fecha_modificacion:%Y-%m-%d}"
 
     class Meta:
