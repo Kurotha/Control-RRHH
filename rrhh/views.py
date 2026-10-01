@@ -16,6 +16,9 @@ from django.core.exceptions import ValidationError
 from .models import Empleado, Permiso, Asistencia, Salario, Evaluacion
 from utils.convertidor import Conversor
 from datetime import date, datetime
+from django.core.exceptions import ObjectDoesNotExist
+import openpyxl
+from django.http import HttpResponse
 
 
 def listar_empleados(request):
@@ -80,15 +83,36 @@ def login_view(request):
     if request.method == 'POST':
         rut = request.POST.get('rut')
         password = request.POST.get('password')
-        user = authenticate(request, username=rut, password=password)
+        usuario = authenticate(request, username=rut, password=password)
 
-        if user is not None:
-            login(request, user)
-            if user.empleado.rol == 'JEFE':
-                return redirect('dashboard_jefe')
-            return redirect('dashboard_empleado')
+        if usuario is not None:
+            login(request, usuario)
+            
+            # Manejo de errores (Try/except + mensajes claros)
+            try:
+                # Intenta resolver la relación OneToOneField
+                if usuario.empleado.rol == 'JEFE':
+                    return redirect('dashboard_jefe')
+                return redirect('dashboard_empleado')
+                
+            except ObjectDoesNotExist:
+                # Captura el error si el usuario no existe en la tabla Empleados
+                if usuario.is_staff or usuario.is_superuser:
+                    return redirect('admin:index')
+                
+                # Manejo de borde: usuario sin privilegios y sin perfil
+                return render(
+                    request, 
+                    'login.html', 
+                    {'error': 'Cuenta sin perfil de empleado asociado.'}
+                )
 
-        return render(request, 'login.html', {'error': 'RUT o contraseña incorrectos'})
+        # Mensaje claro en caso de credenciales inválidas
+        return render(
+            request, 
+            'login.html', 
+            {'error': 'RUT o contraseña incorrectos. Intenta nuevamente.'}
+        )
 
     return render(request, 'login.html')
 
@@ -410,3 +434,70 @@ def dashboard_empleado(request):
         contexto['evaluaciones'] = empleado.evaluaciones.all()
 
     return render(request, 'dashboard_empleado.html', contexto)
+
+@login_required
+def exportar_nomina_excel(request):
+    """
+    Genera y descarga un reporte en formato Excel con la nómina de empleados.
+
+    Consulta la base de datos para extraer el historial de salarios de todos
+    los empleados, incluyendo bonificaciones, descuentos, el sueldo neto y 
+    el estado de pago. Retorna el archivo como una respuesta HTTP directa 
+    para su descarga.
+
+    Args:
+        request (HttpRequest): El objeto que contiene la petición HTTP.
+
+    Returns:
+        HttpResponse: Respuesta HTTP con el archivo .xlsx adjunto y los 
+            encabezados correspondientes para forzar su descarga.
+        HttpResponseRedirect: Redirección al login si el usuario no es jefe.
+    """
+    # Seguridad: Restringir la exportación exclusivamente al rol de JEFE.
+    if request.user.empleado.rol != 'JEFE':
+        return redirect('login')
+
+    # Crear el libro de trabajo y la hoja activa.
+    workbook = openpyxl.Workbook()
+    hoja = workbook.active
+    hoja.title = 'Reporte de Nómina'
+
+    # Definir los encabezados de las columnas del reporte.
+    encabezados = [
+        'RUT', 'Nombre Empleado', 'Mes/Año', 'Sueldo Base', 
+        'Bonificación', 'Descuentos', 'Sueldo Neto', 'Estado de Pago'
+    ]
+    hoja.append(encabezados)
+
+    # Extraer los datos optimizando la consulta con select_related.
+    salarios = Salario.objects.select_related('dni').order_by(
+        '-mes_anio', 'dni__nombre_empleado'
+    )
+
+    # Llenar las filas iterando sobre los registros de salarios.
+    for salario in salarios:
+        estado_pago = "Pagado" if salario.pagado else "Pendiente"
+        hoja.append([
+            salario.dni.dni,
+            salario.dni.nombre_empleado,
+            salario.mes_anio,
+            float(salario.salario_base),
+            float(salario.bonificacion),
+            float(salario.descuentos),
+            float(salario.neto),
+            estado_pago
+        ])
+
+    # Configurar la respuesta HTTP para forzar la descarga del archivo.
+    fecha_actual = datetime.now().strftime('%Y%m%d')
+    nombre_archivo = f"Reporte_Nomina_{fecha_actual}.xlsx"
+    
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+    
+    # Guardar la estructura de Excel directamente en la respuesta HTTP.
+    workbook.save(response)
+    
+    return response
