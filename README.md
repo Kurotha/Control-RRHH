@@ -161,7 +161,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Crear el archivo .env en la raíz del proyecto (junto a manage.py). No está en el repositorio por seguridad: las credenciales se entregan por separado. El archivo .env.example muestra qué variables lleva.
+4. Crear el archivo .env en la raíz del proyecto (junto a manage.py). No está en el repositorio por seguridad: las credenciales se entregan por separado.
 
 5. Levantar el servidor.
 
