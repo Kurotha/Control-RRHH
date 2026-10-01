@@ -1,46 +1,47 @@
 """
 Módulo para la conversión de divisas mediante la API de mindicador.cl.
 
-Provee herramientas para consultar el valor histórico del dólar en Chile
-y convertir montos de pesos chilenos (CLP) a dólares (USD) según la
-tasa de cambio de una fecha específica.
+Implementa un sistema de consulta con caché en memoria utilizando las
+herramientas nativas de Django para optimizar los tiempos de respuesta
+y prevenir bloqueos del servidor por latencia de red.
 """
 
-import requests
 from datetime import datetime, timedelta
+
+import requests
+from django.core.cache import cache
 
 
 class Conversor:
     """
     Clase utilitaria para manejar la conversión de moneda (CLP a USD).
-    
-    Permite consultar la tasa de cambio mediante una API externa,
-    manejando días sin datos (fines de semana, feriados) retrocediendo
-    en el calendario, e incluye un mecanismo de reintentos ante fallas.
+
+    Provee métodos estáticos y de clase para obtener tasas de cambio
+    históricas o actuales, integrando tolerancia a fallos (fail-fast)
+    y respaldo de datos temporales en memoria caché.
     """
 
     @staticmethod
     def dolar_dia(fecha) -> float:
         """
-        Obtiene el valor del dólar en Chile para una fecha específica.
+        Obtiene el valor del dólar consultando la caché o la API externa.
 
-        Convierte la fecha ingresada y consulta la API de mindicador.cl.
-        Si no hay datos para el día especificado, busca retrospectivamente
-        en el día anterior. Si la conexión falla, reintenta hasta 3 veces
-        antes de devolver un valor predeterminado de respaldo.
+        Convierte la fecha ingresada a formato de texto y verifica si
+        existe un registro válido en la memoria caché de Django. Si no hay
+        aciertos, realiza hasta dos peticiones HTTP a la API con un tiempo
+        máximo de espera de 2 segundos. Si la fecha es inhábil o la red
+        falla, retrocede un día en el calendario de forma iterativa.
 
         Args:
-            fecha (str | datetime | date): La fecha a consultar. Puede
-                ser un string con formato 'DD-MM-YYYY' o un objeto
-                proveniente del módulo datetime.
+            fecha (str | datetime.date | datetime.datetime): La fecha a
+                consultar. Acepta formato de texto 'DD-MM-YYYY' o un
+                objeto nativo de fecha de Python.
 
         Returns:
-            float: El valor del dólar en la fecha indicada o la fecha
-                hábil anterior. En caso de fallas de red tras 3
-                intentos, devuelve 940.0 como valor de rescate.
+            float: El valor de conversión del dólar para el día consultado.
+                En caso de fallo total o desconexión externa, devuelve
+                980.0 como tasa predeterminada de respaldo.
         """
-        # Convertimos a objeto datetime si viene como string,
-        # o nos aseguramos de que sea un objeto datetime válido.
         if isinstance(fecha, str):
             fecha_objeto = datetime.strptime(fecha, "%d-%m-%Y")
         elif hasattr(fecha, 'date'):
@@ -48,65 +49,68 @@ class Conversor:
         else:
             fecha_objeto = fecha
 
+        fecha_str = fecha_objeto.strftime("%d-%m-%Y")
+        cache_key = f"tasa_dolar_{fecha_str}"
+
+        tasa_guardada = cache.get(cache_key)
+        if tasa_guardada:
+            return tasa_guardada
+
         data = None
-        # Respaldo para evitar bucle infinito si la API se cae por completo.
         intentos = 0
-        
-        while data is None and intentos < 3:
-            fecha_str = fecha_objeto.strftime("%d-%m-%Y")
-            url = f"https://mindicador.cl/api/dolar/{fecha_str}"
-            
+
+        while data is None and intentos < 2:
+            fecha_consulta = fecha_objeto.strftime('%d-%m-%Y')
+            url = f"https://mindicador.cl/api/dolar/{fecha_consulta}"
+
             try:
-                response = requests.get(url, timeout=5)
+                response = requests.get(url, timeout=2)
                 response.raise_for_status()
                 data = response.json()
-                
-                if data["serie"]:
-                    valor = data["serie"][0]["valor"]
-                    return float(valor)
+
+                if data.get("serie"):
+                    valor = float(data["serie"][0]["valor"])
+                    cache.set(cache_key, valor, 86400)
+                    return valor
                 else:
-                    # Si el día de ingreso no hay datos, revisará
-                    # el día anterior hasta encontrar datos válidos.
                     fecha_objeto -= timedelta(days=1)
                     data = None
-                    
+
             except Exception as e:
-                print(f"No se encontraron datos para la fecha: {fecha_str}. "
-                      f"Error: {e}")
+                print(f"Falla API para {fecha_consulta}: {e}")
                 fecha_objeto -= timedelta(days=1)
                 data = None
                 intentos += 1
-                
-        return 940.0  # Valor de respaldo por si falla la red tras 3 intentos
+
+        return 980.0
 
     @classmethod
     def convertir_pesos_a_dolares(cls, valor_pesos, fecha) -> float:
         """
-        Convierte un monto de pesos chilenos a dólares.
+        Convierte un monto monetario de pesos chilenos (CLP) a dólares (USD).
 
-        Utiliza el método inteligente `dolar_dia` para obtener la tasa de
-        cambio correspondiente a la fecha ingresada y realiza la división.
-        Si ocurren errores de tipo o valor, devuelve 0.0 de forma segura.
+        Delega la obtención de la tasa de cambio al método interno
+        dolar_dia y realiza la división aritmética, aplicando un redondeo
+        a dos posiciones decimales. Incorpora validación estructural para
+        prevenir interrupciones de ejecución por tipos inválidos.
 
         Args:
-            valor_pesos (float | int | str): El monto monetario en pesos
-                chilenos que se desea convertir.
-            fecha (str | datetime | date): La fecha asociada a la
-                transacción para aplicar la tasa de cambio correcta.
+            valor_pesos (float | int | str): El monto a convertir en pesos.
+            fecha (str | datetime.date | datetime.datetime): La fecha
+                exacta de la transacción para aplicar la tasa
+                histórica correspondiente.
 
         Returns:
-            float: El monto equivalente en dólares, redondeado a
-                dos decimales. Si el valor ingresado es nulo o 
-                inválido, retorna 0.0.
+            float: El valor equivalente en dólares. Si los parámetros
+                son nulos o el formato monetario no puede ser procesado,
+                devuelve 0.0.
         """
         if valor_pesos is None:
             return 0.0
-            
+
         try:
             pesos = float(valor_pesos)
-            # Llamamos a la lógica interna con ciclo descendente
             tasa_dolar = cls.dolar_dia(fecha)
-            
             return round(pesos / tasa_dolar, 2)
         except (ValueError, TypeError):
             return 0.0
