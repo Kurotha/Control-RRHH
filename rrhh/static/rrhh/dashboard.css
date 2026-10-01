@@ -931,3 +931,18 @@ tr:last-child td {
 .btn-descargar-excel:hover {
     background-color: #15803d;
 }
+
+
+/* =========================================
+   PANEL RRHH: TABLAS DE DEPARTAMENTOS
+   Columnas de ancho fijo para que queden alineadas entre tablas
+   ========================================= */
+
+.tabla-depto {
+    table-layout: fixed;
+}
+
+.tabla-depto th:nth-child(1) { width: 34%; }
+.tabla-depto th:nth-child(2) { width: 18%; }
+.tabla-depto th:nth-child(3) { width: 30%; }
+.tabla-depto th:nth-child(4) { width: 18%; }
