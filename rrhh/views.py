@@ -1,3 +1,13 @@
+"""
+Módulo de vistas para la aplicación de Recursos Humanos en Django.
+
+Maneja la lógica de presentación y el flujo de datos entre los modelos 
+y las plantillas (templates). Incluye vistas para listar empleados con
+cálculo de nómina en divisas, gestión de autenticación (login/logout),
+y los paneles de control (dashboards) diferenciados para perfiles con
+roles de 'Jefe' y 'Empleado'.
+"""
+
 from django.shortcuts import render
 from django.utils import timezone
 from django.contrib import messages
@@ -7,10 +17,19 @@ from .models import Empleado, Permiso, Asistencia, Salario, Evaluacion
 from utils.convertidor import Conversor
 from datetime import date, datetime
 
+
 def listar_empleados(request):
     """
     Vista que consulta la lista de empleados, obtiene el tipo de cambio
     actual del dólar y calcula los salarios y la nómina total en USD.
+    
+    Args:
+        request (HttpRequest): Objeto con la petición web.
+
+    Returns:
+        HttpResponse: Respuesta renderizada con la plantilla 'empleados.html', 
+            incluyendo la lista de empleados, la nómina total y la tasa 
+            de cambio actual.
     """
     # Consulta todos los empleados de la base de datos (ordenados por el modelo)
     empleados = Empleado.objects.all()
@@ -35,12 +54,29 @@ def listar_empleados(request):
         'tasa_dolar': tasa_dolar
     })
 
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 
 
 def login_view(request):
+    """
+    Gestiona el inicio de sesión de los usuarios.
+
+    Procesa las peticiones POST con RUT y contraseña. Si la autenticación
+    es exitosa, redirige al usuario al panel de control que corresponda 
+    según su rol (Jefe o Empleado).
+
+    Args:
+        request (HttpRequest): Objeto con la petición web y datos del formulario.
+
+    Returns:
+        HttpResponseRedirect: Redirige al dashboard correspondiente si las 
+            credenciales son válidas.
+        HttpResponse: Renderiza 'login.html' (con error en caso de fallo, 
+            o vacío si la petición es GET).
+    """
     if request.method == 'POST':
         rut = request.POST.get('rut')
         password = request.POST.get('password')
@@ -58,6 +94,15 @@ def login_view(request):
 
 
 def logout_view(request):
+    """
+    Finaliza la sesión del usuario autenticado.
+
+    Args:
+        request (HttpRequest): Objeto con la petición web.
+
+    Returns:
+        HttpResponseRedirect: Redirige a la vista de login.
+    """
     logout(request)
     return redirect('login')
 
@@ -72,7 +117,17 @@ SECCIONES_JEFE = [
 
 
 def evaluacion_del_equipo(pk, equipo):
-    """Devuelve la evaluación si existe y es de alguien del equipo; si no, None."""
+    """
+    Devuelve la evaluación si existe y pertenece a alguien del equipo.
+
+    Args:
+        pk (int | str): Llave primaria de la evaluación a buscar.
+        equipo (QuerySet): Conjunto de empleados bajo el cargo del jefe.
+
+    Returns:
+        Evaluacion | None: Objeto Evaluación si se encuentra y cumple las 
+            condiciones; de lo contrario, None.
+    """
     try:
         return Evaluacion.objects.filter(pk=pk, dni__in=equipo).select_related('dni').first()
     except (TypeError, ValueError):  # id inválido en la URL
@@ -81,6 +136,22 @@ def evaluacion_del_equipo(pk, equipo):
 
 @login_required
 def dashboard_jefe(request):
+    """
+    Controlador central del panel para usuarios con rol de Jefe.
+
+    Centraliza la lógica para gestionar el equipo a su cargo, aprobar o
+    rechazar solicitudes de permisos, revisar asistencia, ver nóminas
+    y administrar el sistema de evaluaciones del equipo (crear y editar).
+    
+    Args:
+        request (HttpRequest): Objeto con la petición web y datos de sesión.
+
+    Returns:
+        HttpResponseRedirect: Redirige tras procesar formularios (POST) o si 
+            el usuario no tiene los permisos del rol adecuado.
+        HttpResponse: Plantilla 'dashboard_jefe.html' con el contexto 
+            dinámico según la sección elegida por el jefe.
+    """
     empleado = request.user.empleado
     if empleado.rol != 'JEFE':
         return redirect('login')
@@ -254,6 +325,7 @@ def dashboard_jefe(request):
         contexto['evaluacion'] = evaluacion
 
     return render(request, 'dashboard_jefe.html', contexto)
+
 
 @login_required
 def dashboard_empleado(request):
