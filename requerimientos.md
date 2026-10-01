@@ -20,11 +20,17 @@
 
 - [x] .env en .gitignore
 
-- [ ] Desempeño empleados HTML, API mindicator time out
+- [x] Desempeño empleados HTML, API mindicator time out
 
 - [ ] Contar dias reales trabajados
 
-- [ ] Arreglar lógica botón reporte excel descargar excel cierra sesión
+- [ ] Botón marcar asistencia sin feedback
+
+- [x] Aspecto visual dashboard RRHH 
+
+- [ ] Feedback botón permisos
+
+- [x] Arreglar lógica botón reporte excel descargar excel cierra sesión
 
 ## Aspecto Visual
 
