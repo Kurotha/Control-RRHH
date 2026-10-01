@@ -891,3 +891,40 @@ tr:last-child td {
     }
 
 }
+
+/* =========================================
+   ENCABEZADO CON BOTÓN (Exportaciones)
+   ========================================= */
+
+   .encabezado-con-boton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.encabezado-con-boton h1 {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.encabezado-con-boton h1::after {
+    display: none;
+}
+
+.btn-descargar-excel {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #16a34a;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 7px;
+    transition: 0.2s;
+}
+
+.btn-descargar-excel:hover {
+    background-color: #15803d;
+}

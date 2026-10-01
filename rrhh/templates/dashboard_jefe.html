@@ -113,7 +113,12 @@
         {% endif %}
 
         {% if seccion == 'sueldos' %}
-        <h1>Sueldos del equipo</h1>
+        <div class="encabezado-con-boton">
+            <h1>Sueldos del equipo</h1>
+            <a href="{% url 'exportar_nomina' %}" class="btn-descargar-excel">
+                <i class="fa-solid fa-file-excel"></i> Descargar Excel
+            </a>
+        </div>
         {% if sueldos %}
         <table>
             <tr>
