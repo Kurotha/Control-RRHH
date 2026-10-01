@@ -21,16 +21,41 @@ class EmpleadoAdmin(admin.ModelAdmin):
     Incluye campos de búsqueda, filtros y captura automática de
     auditoría al guardar (crear, modificar, activar o desactivar).
     """
-    # Columnas visibles en la tabla principal
-    list_display = (
-        'dni', 
-        'nombre_empleado', 
-        'departamento', 
-        'puesto', 
-        'estado_empleado'
-    )
-    list_filter = ('estado_empleado', 'departamento', 'puesto')
-    search_fields = ('dni', 'nombre_empleado')
+    list_display = ('nombre_empleado', 'estado_empleado')
+    list_filter = ('estado_empleado',)
+    search_fields = ('nombre_empleado',)
+
+    @admin.display(description='Departamento')
+    def obtener_departamento(self, obj):
+        """
+        Resuelve el departamento actual del empleado consultando su historial.
+        
+        Args:
+            obj (Empleado): Instancia actual del empleado.
+            
+        Returns:
+            str: Nombre del departamento o un mensaje de advertencia.
+        """
+        asignacion = obj.historial_puestos.filter(es_actual=True).first()
+        if asignacion and asignacion.id_puesto:
+            return asignacion.id_puesto.nombre_departamento.nombre_departamento
+        return "Sin departamento"
+
+    @admin.display(description='Puesto')
+    def obtener_puesto(self, obj):
+        """
+        Resuelve el nombre del puesto actual del empleado.
+        
+        Args:
+            obj (Empleado): Instancia actual del empleado.
+            
+        Returns:
+            str: Nombre del puesto o un mensaje de advertencia.
+        """
+        asignacion = obj.historial_puestos.filter(es_actual=True).first()
+        if asignacion and asignacion.id_puesto:
+            return asignacion.id_puesto.nombre_puesto
+        return "Sin puesto asignado"
 
     def save_model(self, request, obj, form, change):
         """
