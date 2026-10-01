@@ -212,7 +212,7 @@
 
                     <span>Estado</span>
 
-                    {% if empleado.activo %}
+                    {% if empleado.estado_empleado %}
 
                     <strong class="estado estado-activo">
                         Activo
@@ -277,7 +277,47 @@
 
         {% endif %}
 
+        <!-- =====================================
+             HISTORIAL DE PUESTOS
+             ===================================== -->
 
+        {% if seccion == 'info' or not seccion %}
+
+        <h2 class="titulo-secundario">Mi historial de puestos</h2>
+
+        {% if historial_puestos %}
+
+        <table>
+            <tr>
+                <th>Puesto</th>
+                <th>Departamento</th>
+                <th>Desde</th>
+                <th>Hasta</th>
+            </tr>
+
+            {% for h in historial_puestos %}
+            <tr>
+                <td>{{ h.id_puesto.nombre_puesto }}</td>
+                <td>{{ h.id_puesto.nombre_departamento }}</td>
+                <td>{{ h.fecha_inicio_puesto|date:"d-m-Y" }}</td>
+                <td>
+                    {% if h.es_actual %}
+                    <span class="estado estado-aprobado">Actual</span>
+                    {% else %}
+                    {{ h.fecha_fin_puesto|date:"d-m-Y"|default:"-" }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        {% else %}
+
+        <div class="sin-datos">Aún no tienes puestos registrados.</div>
+
+        {% endif %}
+
+        {% endif %}
 
         <!-- =====================================
              MIS PERMISOS
@@ -479,6 +519,28 @@
             Últimos 30 registros de asistencia.
         </p>
 
+        <form method="post" style="display: flex; gap: 12px; margin-bottom: 1.5rem;">
+
+            {% csrf_token %}
+
+            <button type="submit" name="accion" value="marcar_entrada" class="btn-guardar"
+                    {% if asistencia_hoy %}disabled{% endif %}>
+                Marcar entrada
+            </button>
+
+            <button type="submit" name="accion" value="marcar_salida" class="btn-guardar"
+                    {% if not asistencia_hoy or asistencia_hoy.hora_salida %}disabled{% endif %}>
+                Marcar salida
+            </button>
+
+        </form>
+
+        {% if asistencia_hoy %}
+        <p class="texto-seccion">
+            Hoy: entrada {{ asistencia_hoy.hora_entrada|time:"H:i" }}
+            {% if asistencia_hoy.hora_salida %}· salida {{ asistencia_hoy.hora_salida|time:"H:i" }}{% endif %}
+        </p>
+        {% endif %}
 
         {% if asistencias %}
 

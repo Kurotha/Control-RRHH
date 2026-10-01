@@ -110,7 +110,7 @@
                             type="text"
                             id="rut"
                             name="rut"
-                            placeholder="Ej: 12.345.678-9"
+                            placeholder="Ej: 12345678-9"
                             required>
                     </div>
 
@@ -131,7 +131,7 @@
                             placeholder="Tu contraseña"
                             required>
 
-                        <i class="fa-regular fa-eye-slash ojo"></i>
+                        <i class="fa-regular fa-eye-slash ojo" id="toggle-password" style="cursor: pointer;"></i>
 
                     </div>
 
@@ -165,6 +165,19 @@
         </section>
 
     </main>
+
+    <script>
+        // Muestra u oculta la contraseña al hacer clic en el ojito
+        const ojo = document.getElementById('toggle-password');
+        const campoPassword = document.getElementById('password');
+
+        ojo.addEventListener('click', function () {
+            const oculta = campoPassword.type === 'password';
+            campoPassword.type = oculta ? 'text' : 'password';
+            ojo.classList.toggle('fa-eye', oculta);
+            ojo.classList.toggle('fa-eye-slash', !oculta);
+        });
+    </script>
 
 </body>
 

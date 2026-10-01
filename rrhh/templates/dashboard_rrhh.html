@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de RRHH</title>
+    <link rel="stylesheet" href="{% static 'rrhh/dashboard.css' %}">
+</head>
+<body>
+<div class="panel">
+
+    <aside class="menu">
+        <h2>Panel de RRHH</h2>
+        <nav>
+            {% for clave, nombre in secciones %}
+            <a href="?seccion={{ clave }}" class="{% if seccion == clave %}activo{% endif %}">{{ nombre }}</a>
+            {% endfor %}
+            <a href="{% url 'listar_empleados' %}">Sueldos y nómina (USD)</a>
+            <a href="{% url 'exportar_nomina' %}">Reporte de nómina (Excel)</a>
+        </nav>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-salir">Cerrar sesión</button>
+        </form>
+    </aside>
+
+    <main class="contenido">
+
+        {% for mensaje in messages %}
+        <div class="aviso aviso-{{ mensaje.tags }}">{{ mensaje }}</div>
+        {% endfor %}
+
+        {% if seccion == 'departamentos' %}
+        <h1>Departamentos</h1>
+
+        {% for d in departamentos %}
+        <h2>{{ d.depto.nombre_departamento }}</h2>
+        <p>
+            Jefe del área:
+            <strong>{% if d.depto.dni_jefe %}{{ d.depto.dni_jefe.nombre_empleado }}{% else %}Sin jefe asignado{% endif %}</strong>
+            · Empleados activos: <strong>{{ d.cantidad }}</strong>
+            · Total sueldos: <strong>${{ d.total|floatformat:"0g" }}</strong>
+        </p>
+
+        {% if d.filas %}
+        <table>
+            <tr><th>Nombre</th><th>RUT</th><th>Puesto</th><th>Sueldo base</th></tr>
+            {% for f in d.filas %}
+            <tr>
+                <td>{{ f.empleado.nombre_empleado }}</td>
+                <td>{{ f.empleado.dni }}</td>
+                <td>{{ f.puesto }}</td>
+                <td>{{ f.salario|floatformat:"0g" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>Este departamento no tiene empleados activos.</p>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+
+        {% if seccion == 'permisos' %}
+        <h1>Próximos permisos</h1>
+        {% for depto, lista in permisos_por_depto %}
+        <h2>{{ depto }}</h2>
+        <table>
+            <tr><th>Empleado</th><th>Tipo</th><th>Desde</th><th>Hasta</th><th>Días hábiles</th><th>Estado</th></tr>
+            {% for p in lista %}
+            <tr>
+                <td>{{ p.dni.nombre_empleado }}</td>
+                <td>{{ p.tipo }}</td>
+                <td>{{ p.fecha_inicio_permiso|date:"d-m-Y" }}</td>
+                <td>{{ p.fecha_fin_permiso|date:"d-m-Y" }}</td>
+                <td>{{ p.dias }}</td>
+                <td>{% if p.aprobado is None %}Pendiente{% elif p.aprobado %}Aprobado{% else %}Rechazado{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% empty %}
+        <p>No hay permisos próximos.</p>
+        {% endfor %}
+        {% endif %}
+
+        {% if seccion == 'evaluaciones' %}
+        <h1>Evaluaciones pendientes · {{ periodo }}</h1>
+        {% for depto, lista in pendientes_por_depto %}
+        <h2>{{ depto }} ({{ lista|length }})</h2>
+        <table>
+            <tr><th>Nombre</th><th>RUT</th></tr>
+            {% for e in lista %}
+            <tr><td>{{ e.nombre_empleado }}</td><td>{{ e.dni }}</td></tr>
+            {% endfor %}
+        </table>
+        {% empty %}
+        <p>Todos los empleados activos tienen evaluación en este período.</p>
+        {% endfor %}
+        {% endif %}
+
+    </main>
+</div>
+</body>
+</html>

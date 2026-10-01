@@ -52,7 +52,7 @@ class Empleado(models.Model):
     )
     rol = models.CharField(
         max_length=10,
-        choices=[('JEFE', 'Jefe'), ('EMPLEADO', 'Empleado')],
+        choices=[('JEFE', 'Jefe'), ('RRHH', 'Recursos Humanos'), ('EMPLEADO', 'Empleado')],
         default='EMPLEADO',
     )
     
