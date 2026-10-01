@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from .models import Empleado, Permiso, Asistencia, Salario, Evaluacion
 from utils.convertidor import Conversor
 from datetime import date, datetime
+from django.core.exceptions import ObjectDoesNotExist
 import openpyxl
 from django.http import HttpResponse
 
@@ -43,18 +44,55 @@ from django.shortcuts import redirect
 
 
 def login_view(request):
+    """
+    Gestiona la autenticación de usuarios y su redirección basada en roles.
+
+    Valida las credenciales ingresadas. Si el usuario es válido, intenta
+    acceder a su relación 'empleado' para redirigirlo al panel de Jefe o
+    Empleado. Si ocurre una excepción porque el usuario no tiene un perfil
+    de recursos humanos (como el superusuario administrador), la captura
+    y lo redirige de forma segura al panel administrativo nativo de Django.
+
+    Args:
+        request (HttpRequest): El objeto de la petición HTTP.
+
+    Returns:
+        HttpResponse: Redirección al dashboard correspondiente, al panel 
+            de administración, o la plantilla de login con un mensaje de error.
+    """
     if request.method == 'POST':
         rut = request.POST.get('rut')
         password = request.POST.get('password')
-        user = authenticate(request, username=rut, password=password)
+        usuario = authenticate(request, username=rut, password=password)
 
-        if user is not None:
-            login(request, user)
-            if user.empleado.rol == 'JEFE':
-                return redirect('dashboard_jefe')
-            return redirect('dashboard_empleado')
+        if usuario is not None:
+            login(request, usuario)
+            
+            # Manejo de errores (Try/except + mensajes claros)
+            try:
+                # Intenta resolver la relación OneToOneField
+                if usuario.empleado.rol == 'JEFE':
+                    return redirect('dashboard_jefe')
+                return redirect('dashboard_empleado')
+                
+            except ObjectDoesNotExist:
+                # Captura el error si el usuario no existe en la tabla Empleados
+                if usuario.is_staff or usuario.is_superuser:
+                    return redirect('admin:index')
+                
+                # Manejo de borde: usuario sin privilegios y sin perfil
+                return render(
+                    request, 
+                    'login.html', 
+                    {'error': 'Cuenta sin perfil de empleado asociado.'}
+                )
 
-        return render(request, 'login.html', {'error': 'RUT o contraseña incorrectos'})
+        # Mensaje claro en caso de credenciales inválidas
+        return render(
+            request, 
+            'login.html', 
+            {'error': 'RUT o contraseña incorrectos. Intenta nuevamente.'}
+        )
 
     return render(request, 'login.html')
 
