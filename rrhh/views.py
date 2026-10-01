@@ -201,8 +201,8 @@ def dashboard_jefe(request):
         HttpResponse: Plantilla 'dashboard_jefe.html' con el contexto
             dinámico según la sección elegida por el jefe.
     """
-    empleado = request.user.empleado
-    if empleado.rol != 'JEFE':
+    empleado = getattr(request.user, 'empleado', None)
+    if empleado is None or empleado.rol != 'JEFE':
         return redirect('login')
 
     departamentos = empleado.departamentos_dirigidos.all()
@@ -619,9 +619,9 @@ def exportar_nomina_excel(request):
             encabezados correspondientes para forzar su descarga.
         HttpResponseRedirect: Redirección al login si el usuario no es RRHH.
     """
-    # Seguridad: Restringir la exportación exclusivamente al rol de RRHH.
+    # Seguridad: RRHH descarga toda la empresa; el Jefe, solo su equipo.
     empleado = getattr(request.user, 'empleado', None)
-    if empleado is None or empleado.rol != 'RRHH':
+    if empleado is None or empleado.rol not in ('RRHH', 'JEFE'):
         return redirect('login')
 
     # Crear el libro de trabajo y la hoja activa.
@@ -640,6 +640,15 @@ def exportar_nomina_excel(request):
     salarios = Salario.objects.select_related('dni').order_by(
         '-mes_anio', 'dni__nombre_empleado'
     )
+
+    # El jefe solo descarga los sueldos de su propio equipo.
+    if empleado.rol == 'JEFE':
+        equipo = Empleado.objects.filter(
+            estado_empleado=True,
+            historial_puestos__es_actual=True,
+            historial_puestos__id_puesto__nombre_departamento__in=empleado.departamentos_dirigidos.all(),
+        ).exclude(pk=empleado.pk).distinct()
+        salarios = salarios.filter(dni__in=equipo)
 
     # Llenar las filas iterando sobre los registros de salarios.
     for salario in salarios:
