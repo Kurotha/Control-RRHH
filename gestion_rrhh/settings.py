@@ -132,3 +132,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_AGE = 28800  # 8 horas, en segundos
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 LOGIN_URL = 'login'
+
+# Si falla la verificación CSRF, se muestra el login con un mensaje (ver rrhh/views.py)
+CSRF_FAILURE_VIEW = 'rrhh.views.csrf_fallo'
