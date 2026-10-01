@@ -9,6 +9,7 @@ roles de 'Jefe', 'RRHH' y 'Empleado'.
 """
 
 from datetime import date, datetime
+from django.db.models import Prefetch
 
 import numpy as np
 import openpyxl
@@ -36,36 +37,37 @@ def listar_empleados(request):
     Vista que consulta la lista de empleados, obtiene el tipo de cambio
     actual del dólar y calcula los salarios y la nómina total en USD.
 
-    Solo el rol RRHH puede ver los sueldos. Los empleados se ordenan de
-    mayor a menor salario.
+    Implementa optimización de consultas (N+1) cargando el historial
+    de puestos y la información salarial en memoria (RAM) mediante
+    prefetch_related y select_related, reduciendo el tiempo de carga a milisegundos.
 
     Args:
         request (HttpRequest): Objeto con la petición web.
 
     Returns:
-        HttpResponse: Respuesta renderizada con la plantilla 'empleados.html',
-            incluyendo la lista de empleados, la nómina total y la tasa
-            de cambio actual.
+        HttpResponse: Respuesta renderizada con la plantilla 'empleados.html'.
         HttpResponseRedirect: Redirige a 'login' si el usuario no es RRHH.
     """
-    # Solo RRHH puede ver sueldos
     if not hasattr(request.user, 'empleado') or request.user.empleado.rol != 'RRHH':
         return redirect('login')
 
-    # Consulta todos los empleados de la base de datos (ordenados por el modelo)
-    empleados = list(Empleado.objects.all())
+    # Optimización: Extraemos todos los empleados y sus puestos en 2 consultas masivas
+    empleados = list(Empleado.objects.prefetch_related(
+        Prefetch(
+            'historial_puestos',
+            queryset=EmpleadoPuesto.objects.select_related('id_puesto').order_by('-fecha_inicio_puesto'),
+            to_attr='puestos_cacheados'  # Guardamos el resultado en la RAM
+        )
+    ))
 
-    # Obtenemos la tasa de cambio del dólar una sola vez para no saturar la API
     tasa_dolar = Conversor.dolar_dia(timezone.now())
 
-    # Calculamos el salario en USD para cada empleado y el total de la nómina
     total_nomina = 0.0
     for emp in empleados:
-        # Si ya no tiene puesto actual (inactivo), usa el último que tuvo
-        puesto_actual = (
-            emp.historial_puestos.filter(es_actual=True).first()
-            or emp.historial_puestos.first()
-        )
+        # Resolvemos el puesto iterando en la RAM (Python), sin golpear la Base de Datos (SQL)
+        puestos = emp.puestos_cacheados
+        puesto_actual = next((p for p in puestos if p.es_actual), None) or (puestos[0] if puestos else None)
+        
         salario_base = puesto_actual.id_puesto.salario_base if puesto_actual else 0
 
         emp.salario_usd = round(float(salario_base) / tasa_dolar, 2)
@@ -75,10 +77,9 @@ def listar_empleados(request):
         if emp.estado_empleado:
             total_nomina += emp.salario_usd
 
-    # Ordena de mayor a menor salario (lo pide la Evaluación 1)
+    # Ordena de mayor a menor salario
     empleados.sort(key=lambda e: e.salario_usd, reverse=True)
 
-    # Renderiza la plantilla HTML enviando el contexto con la lista de empleados, nómina total y tasa
     return render(request, 'empleados.html', {
         'empleados': empleados,
         'total_nomina': total_nomina,
