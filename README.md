@@ -2,7 +2,7 @@
 
 Sistema web de gestión de recursos humanos hecho con Django. Proyecto de la asignatura Programación Back End (TI3V41), INACAP.
 
-Integrantes: (completar con los nombres del equipo)
+Integrantes: (Carmen Quezada, Marllecelly Parra, Juan Carlos Parra, Kevin Garcés, Jennifer Pérez)
 
 ## Qué hace
 
