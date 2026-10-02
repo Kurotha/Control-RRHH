@@ -221,7 +221,7 @@
                             <strong>{{ a.fecha|date:'d-m-Y' }}</strong>
                             <div class="small text-secondary">{{ a.hora_entrada|time:'H:i'|default:'--:--' }} - {{ a.hora_salida|time:'H:i'|default:'--:--' }}</div>
                         </div>
-                        <span>{{ a.minutos_trabajados }} min</span>
+                        <span>{{ a.horas_trabajadas_formateadas }}</span>
                     </div>
                 {% empty %}
                     <p>Sin registros.</p>

@@ -24,11 +24,11 @@
 
 - [ ] Contar dias reales trabajados
 
-- [ ] Botón marcar asistencia sin feedback
+- [x] Botón marcar asistencia sin feedback
 
 - [x] Aspecto visual dashboard RRHH 
 
-- [ ] Feedback botón permisos
+- [x] Feedback botón permisos
 
 - [x] Arreglar lógica botón reporte excel descargar excel cierra sesión
 
