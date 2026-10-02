@@ -1,29 +1,284 @@
-{% load static %}<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Portal del empleado</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-      rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"><link href="{% static 'rrhh/app.css' %}" rel="stylesheet"></head><body><header class="app-header sticky-top border-bottom shadow-sm"><div class="container app-shell py-2 d-flex justify-content-between align-items-center"><div class="d-flex align-items-center gap-2"><div class="brand-box"><i class="bi bi-person-badge"></i></div><div><strong>Portal del empleado</strong><div class="small text-secondary">{{ empleado.nombre_empleado }}</div></div></div><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="btn btn-light" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form></div></header><main class="container app-shell py-3">{% if messages %}<div class="message-list">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>{% endfor %}</div>{% endif %}<section class="card card-soft p-3 mb-3"><div class="d-flex align-items-center gap-3"><div class="avatar">{{ empleado.nombre_empleado|slice:':1'|upper }}</div><div><h1 class="h6 fw-bold mb-0">{{ empleado.nombre_empleado }}</h1>
-<div class="small text-secondary">{{ empleado.email }}</div><span class="badge {% if empleado.estado_empleado %}bg-success-subtle text-success-emphasis{% else %}bg-secondary-subtle{% endif %}">{% if empleado.estado_empleado %}Activo{% else %}Inactivo{% endif %}</span></div></div></section><nav class="nav-scroll section-pills mb-3"><div class="nav gap-2 flex-nowrap">{% for key,label in secciones_empleado|default:'' %}{% endfor %}<a class="nav-link {% if seccion == 'info' %}active{% endif %}"
-   href="?seccion=info">Información</a><a class="nav-link {% if seccion == 'permisos' %}active{% endif %}"
-   href="?seccion=permisos">Permisos</a><a class="nav-link {% if seccion == 'asistencia' %}active{% endif %}"
-   href="?seccion=asistencia">Asistencia</a><a class="nav-link {% if seccion == 'sueldos' %}active{% endif %}"
-   href="?seccion=sueldos">Sueldos</a><a class="nav-link {% if seccion == 'evaluaciones' %}active{% endif %}"
-   href="?seccion=evaluaciones">Evaluaciones</a></div></nav>{% if seccion == "info" or not seccion %}<section class="card card-soft p-3 mb-3"><h2 class="h6 fw-bold"><i class="bi bi-building me-2 text-primary-custom"></i>Información laboral</h2>
-<div class="list-group list-group-flush"><div class="list-group-item px-0 d-flex justify-content-between"><span>Puesto</span><strong>{% if puesto_actual %}{{ puesto_actual.id_puesto.nombre_puesto }}{% else %}Sin puesto{% endif %}</strong></div><div class="list-group-item px-0 d-flex justify-content-between"><span>Departamento</span><strong>{% if puesto_actual %}{{ puesto_actual.id_puesto.nombre_departamento }}{% else %}-{% endif %}</strong></div><div class="list-group-item px-0 d-flex justify-content-between"><span>Contratación</span><strong>{{ empleado.fecha_contratacion|date:'d-m-Y' }}</strong></div><div class="list-group-item px-0 d-flex justify-content-between"><span>RUT</span><strong>{{ empleado.dni }}</strong></div><div class="list-group-item px-0 d-flex justify-content-between"><span>Teléfono</span><strong>{{ empleado.telefono }}</strong></div><div class="list-group-item px-0 d-flex justify-content-between safe-wrap"><span>Dirección</span><strong>{{ empleado.direccion }}</strong></div></div></section><section class="card card-soft p-3"><h2 class="h6 fw-bold">Historial de puestos</h2>
-{% for h in historial_puestos %}<div class="metric mb-2"><strong>{{ h.id_puesto.nombre_puesto }}</strong><div class="small text-secondary">{{ h.id_puesto.nombre_departamento }} · {{ h.fecha_inicio_puesto|date:'d-m-Y' }}{% if h.fecha_fin_puesto %} a {{ h.fecha_fin_puesto|date:'d-m-Y' }}{% else %} · Actual{% endif %}</div></div>{% empty %}<p class="text-secondary">Sin historial.</p>{% endfor %}</section>{% elif seccion == "permisos" %}<div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">Mis permisos</h2>
-<button type="button" class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#permisoModal"><i class="bi bi-plus-lg"></i> Solicitar</button></div><section class="d-flex flex-column gap-2">{% for p in permisos %}<article class="card card-soft p-3"><div class="d-flex justify-content-between"><strong>{{ p.tipo }}</strong><span class="badge {% if p.aprobado == True %}bg-success-subtle text-success-emphasis{% elif p.aprobado == False %}bg-danger-subtle text-danger-emphasis{% else %}bg-warning-subtle text-warning-emphasis{% endif %}">{% if p.aprobado == True %}Aprobado{% elif p.aprobado == False %}Rechazado{% else %}Pendiente{% endif %}</span></div><div class="small text-secondary">{{ p.fecha_inicio_permiso|date:'d-m-Y' }} al {{ p.fecha_fin_permiso|date:'d-m-Y' }} · {{ p.dias }} día{{ p.dias|pluralize }}</div></article>{% empty %}<div class="alert alert-info">No tienes solicitudes.</div>{% endfor %}</section><div class="modal fade" id="permisoModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content rounded-4"><form method="post"
-      action="{% url 'dashboard_empleado' %}?seccion=permisos">{% csrf_token %}<input type="hidden" name="accion" value="solicitar"><div class="modal-header"><h3 class="modal-title h6">Nueva solicitud</h3>
-<button class="btn-close" data-bs-dismiss="modal" type="button"></button></div><div class="modal-body"><label class="form-label">Tipo</label><select class="form-select mb-3" name="tipo" required><option value="">Selecciona</option><option>Vacaciones</option><option>Cita médica</option><option>Capacitación</option><option>Permiso personal</option></select><div class="row g-2"><div class="col-6"><label class="form-label">Desde</label><input class="form-control" type="date" name="fecha_inicio" required></div><div class="col-6"><label class="form-label">Hasta</label><input class="form-control" type="date" name="fecha_fin" required></div></div></div><div class="modal-footer"><button class="btn btn-light" type="button" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary">Enviar</button></div></form></div></div></div>{% elif seccion == "asistencia" %}<section class="card card-soft p-3 mb-3"><h2 class="h6 fw-bold">Jornada de hoy</h2>
-<div class="row g-2 mb-3"><div class="col-6"><div class="metric"><small>Entrada</small><div class="h5 mb-0">{{ asistencia_hoy.hora_entrada|time:'H:i'|default:'--:--' }}</div></div></div><div class="col-6"><div class="metric"><small>Salida</small><div class="h5 mb-0">{{ asistencia_hoy.hora_salida|time:'H:i'|default:'--:--' }}</div></div></div></div><form method="post" class="row g-2">{% csrf_token %}<div class="col-6"><button type="submit" class="btn btn-outline-success w-100"
-        name="accion"
-        value="marcar_entrada"
-        {% if asistencia_hoy %}disabled{% endif %}>Marcar entrada</button></div><div class="col-6"><button type="submit" class="btn btn-primary w-100"
-        name="accion"
-        value="marcar_salida"
-        {% if not asistencia_hoy or asistencia_hoy.hora_salida %}disabled{% endif %}>Marcar salida</button></div></form></section><section class="card card-soft p-3"><h2 class="h6 fw-bold">Últimos registros</h2>
-{% for a in asistencias %}<div class="metric mb-2 d-flex justify-content-between"><div><strong>{{ a.fecha|date:'d-m-Y' }}</strong><div class="small text-secondary">{{ a.hora_entrada|time:'H:i'|default:'--:--' }} - {{ a.hora_salida|time:'H:i'|default:'--:--' }}</div></div><span>{{ a.minutos_trabajados }} min</span></div>{% empty %}<p>Sin registros.</p>{% endfor %}</section>{% elif seccion == "sueldos" %}<section class="d-flex flex-column gap-2">{% for s in sueldos %}<article class="card card-soft p-3"><div class="d-flex justify-content-between"><strong>{{ s.mes_anio }}</strong><span class="badge {% if s.pagado %}bg-success{% else %}bg-warning text-dark{% endif %}">{% if s.pagado %}Pagado{% else %}Pendiente{% endif %}</span></div><div class="display-6 text-primary-custom">${{ s.neto|floatformat:0 }}</div><div class="small text-secondary">Base ${{ s.salario_base|floatformat:"0g" }} · Bonificación ${{ s.bonificacion|floatformat:"0g" }} · Descuentos ${{ s.descuentos|floatformat:"0g" }}</div></article>{% empty %}<div class="alert alert-info">Sin liquidaciones.</div>{% endfor %}</section>{% else %}<section class="d-flex flex-column gap-2">{% for e in evaluaciones %}<article class="card card-soft p-3"><div class="d-flex justify-content-between"><strong>{{ e.periodo }}</strong><span class="badge bg-primary">{{ e.puntuacion }}/5</span></div><p class="mb-0 mt-2">{{ e.feedback }}</p></article>{% empty %}<div class="alert alert-info">Sin evaluaciones.</div>{% endfor %}</section>{% endif %}</main><nav class="navbar fixed-bottom bottom-nav"><div class="container app-shell row g-0 text-center"><a class="col {% if seccion == 'info' %}active{% endif %}"
-   href="?seccion=info"><i class="bi bi-person"></i>Perfil</a><a class="col {% if seccion == 'permisos' %}active{% endif %}"
-   href="?seccion=permisos"><i class="bi bi-calendar"></i>Permisos</a><a class="col {% if seccion == 'asistencia' %}active{% endif %}"
-   href="?seccion=asistencia"><i class="bi bi-clock"></i>Asistencia</a><a class="col {% if seccion == 'sueldos' %}active{% endif %}"
-   href="?seccion=sueldos"><i class="bi bi-wallet2"></i>Sueldos</a></div></nav><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script></body></html>
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Portal del empleado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'rrhh/app.css' %}" rel="stylesheet">
+</head>
+<body>
+    <header class="app-header sticky-top border-bottom shadow-sm">
+        <div class="container app-shell py-2 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <div class="brand-box">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div>
+                    <strong>Portal del empleado</strong>
+                    <div class="small text-secondary">{{ empleado.nombre_empleado }}</div>
+                </div>
+            </div>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-light" title="Cerrar sesión">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <main class="container app-shell py-3">
+        {% if messages %}
+            <div class="message-list">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="card card-soft p-3 mb-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar">{{ empleado.nombre_empleado|slice:':1'|upper }}</div>
+                <div>
+                    <h1 class="h6 fw-bold mb-0">{{ empleado.nombre_empleado }}</h1>
+                    <div class="small text-secondary">{{ empleado.email }}</div>
+                    <span class="badge {% if empleado.estado_empleado %}bg-success-subtle text-success-emphasis{% else %}bg-secondary-subtle{% endif %}">
+                        {% if empleado.estado_empleado %}Activo{% else %}Inactivo{% endif %}
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <nav class="nav-scroll section-pills mb-3">
+            <div class="nav gap-2 flex-nowrap">
+                <a class="nav-link {% if seccion == 'info' %}active{% endif %}" href="?seccion=info">Información</a>
+                <a class="nav-link {% if seccion == 'permisos' %}active{% endif %}" href="?seccion=permisos">Permisos</a>
+                <a class="nav-link {% if seccion == 'asistencia' %}active{% endif %}" href="?seccion=asistencia">Asistencia</a>
+                <a class="nav-link {% if seccion == 'sueldos' %}active{% endif %}" href="?seccion=sueldos">Sueldos</a>
+                <a class="nav-link {% if seccion == 'evaluaciones' %}active{% endif %}" href="?seccion=evaluaciones">Evaluaciones</a>
+            </div>
+        </nav>
+
+        {% if seccion == "info" or not seccion %}
+            <section class="card card-soft p-3 mb-3">
+                <h2 class="h6 fw-bold"><i class="bi bi-building me-2 text-primary-custom"></i>Información laboral</h2>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0 d-flex justify-content-between">
+                        <span>Puesto</span><strong>{% if puesto_actual %}{{ puesto_actual.id_puesto.nombre_puesto }}{% else %}Sin puesto{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item px-0 d-flex justify-content-between">
+                        <span>Departamento</span><strong>{% if puesto_actual %}{{ puesto_actual.id_puesto.nombre_departamento }}{% else %}-{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item px-0 d-flex justify-content-between">
+                        <span>Contratación</span><strong>{{ empleado.fecha_contratacion|date:'d-m-Y' }}</strong>
+                    </div>
+                    <div class="list-group-item px-0 d-flex justify-content-between">
+                        <span>RUT</span><strong>{{ empleado.dni }}</strong>
+                    </div>
+                    <div class="list-group-item px-0 d-flex justify-content-between">
+                        <span>Teléfono</span><strong>{{ empleado.telefono }}</strong>
+                    </div>
+                    <div class="list-group-item px-0 d-flex justify-content-between safe-wrap">
+                        <span>Dirección</span><strong>{{ empleado.direccion }}</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card card-soft p-3">
+                <h2 class="h6 fw-bold">Historial de puestos</h2>
+                {% for h in historial_puestos %}
+                    <div class="metric mb-2">
+                        <strong>{{ h.id_puesto.nombre_puesto }}</strong>
+                        <div class="small text-secondary">
+                            {{ h.id_puesto.nombre_departamento }} · {{ h.fecha_inicio_puesto|date:'d-m-Y' }}
+                            {% if h.fecha_fin_puesto %} a {{ h.fecha_fin_puesto|date:'d-m-Y' }}{% else %} · Actual{% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-secondary">Sin historial.</p>
+                {% endfor %}
+            </section>
+
+        {% elif seccion == "permisos" %}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 mb-0">Mis permisos</h2>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#permisoModal">
+                    <i class="bi bi-plus-lg"></i> Solicitar
+                </button>
+            </div>
+
+            <section class="d-flex flex-column gap-2">
+                {% for p in permisos %}
+                    <article class="card card-soft p-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ p.tipo }}</strong>
+                            <span class="badge {% if p.aprobado == True %}bg-success-subtle text-success-emphasis{% elif p.aprobado == False %}bg-danger-subtle text-danger-emphasis{% else %}bg-warning-subtle text-warning-emphasis{% endif %}">
+                                {% if p.aprobado == True %}Aprobado{% elif p.aprobado == False %}Rechazado{% else %}Pendiente{% endif %}
+                            </span>
+                        </div>
+                        <div class="small text-secondary">
+                            {{ p.fecha_inicio_permiso|date:'d-m-Y' }} al {{ p.fecha_fin_permiso|date:'d-m-Y' }} · {{ p.dias }} día{{ p.dias|pluralize }}
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="alert alert-info">No tienes solicitudes.</div>
+                {% endfor %}
+            </section>
+
+            <!-- Modal de Permisos -->
+            <div class="modal fade" id="permisoModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content rounded-4">
+                        <form method="post" action="{% url 'dashboard_empleado' %}?seccion=permisos">
+                            {% csrf_token %}
+                            <input type="hidden" name="accion" value="solicitar">
+                            <div class="modal-header">
+                                <h3 class="modal-title h6">Nueva solicitud</h3>
+                                <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select mb-3" name="tipo" required>
+                                    <option value="">Selecciona</option>
+                                    <option>Vacaciones</option>
+                                    <option>Cita médica</option>
+                                    <option>Capacitación</option>
+                                    <option>Permiso personal</option>
+                                </select>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="form-label">Desde</label>
+                                        <input class="form-control" type="date" name="fecha_inicio" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Hasta</label>
+                                        <input class="form-control" type="date" name="fecha_fin" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-light" type="button" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Enviar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        {% elif seccion == "asistencia" %}
+            <section class="card card-soft p-3 mb-3">
+                <h2 class="h6 fw-bold">Jornada de hoy</h2>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="metric">
+                            <small>Entrada</small>
+                            <div class="h5 mb-0">{{ asistencia_hoy.hora_entrada|time:'H:i'|default:'--:--' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="metric">
+                            <small>Salida</small>
+                            <div class="h5 mb-0">{{ asistencia_hoy.hora_salida|time:'H:i'|default:'--:--' }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FORMULARIO DESACOPLADO CON ATRIBUTOS DATA-* -->
+                <form id="form-asistencia" method="post" class="row g-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" id="accion-asistencia" value="">
+                    
+                    <div class="col-6">
+                        <button type="button" class="btn btn-outline-success w-100 btn-asistencia"
+                                data-tipo="entrada"
+                                data-hora="{% if asistencia_hoy %}{{ asistencia_hoy.hora_entrada|time:'H:i' }}{% endif %}">
+                            Marcar entrada
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" class="btn btn-primary w-100 btn-asistencia"
+                                data-tipo="salida"
+                                data-hora="{% if asistencia_hoy.hora_salida %}{{ asistencia_hoy.hora_salida|time:'H:i' }}{% endif %}"
+                                data-tiene-entrada="{% if asistencia_hoy %}true{% else %}false{% endif %}">
+                            Marcar salida
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="card card-soft p-3">
+                <h2 class="h6 fw-bold">Últimos registros</h2>
+                {% for a in asistencias %}
+                    <div class="metric mb-2 d-flex justify-content-between">
+                        <div>
+                            <strong>{{ a.fecha|date:'d-m-Y' }}</strong>
+                            <div class="small text-secondary">{{ a.hora_entrada|time:'H:i'|default:'--:--' }} - {{ a.hora_salida|time:'H:i'|default:'--:--' }}</div>
+                        </div>
+                        <span>{{ a.minutos_trabajados }} min</span>
+                    </div>
+                {% empty %}
+                    <p>Sin registros.</p>
+                {% endfor %}
+            </section>
+
+        {% elif seccion == "sueldos" %}
+            <section class="d-flex flex-column gap-2">
+                {% for s in sueldos %}
+                    <article class="card card-soft p-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ s.mes_anio }}</strong>
+                            <span class="badge {% if s.pagado %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                                {% if s.pagado %}Pagado{% else %}Pendiente{% endif %}
+                            </span>
+                        </div>
+                        <div class="display-6 text-primary-custom">${{ s.neto|floatformat:0 }}</div>
+                        <div class="small text-secondary">
+                            Base ${{ s.salario_base|floatformat:0 }} · Bonificación ${{ s.bonificacion|floatformat:0 }} · Descuentos ${{ s.descuentos|floatformat:0 }}
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="alert alert-info">Sin liquidaciones.</div>
+                {% endfor %}
+            </section>
+
+        {% else %}
+            <section class="d-flex flex-column gap-2">
+                {% for e in evaluaciones %}
+                    <article class="card card-soft p-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ e.periodo }}</strong>
+                            <span class="badge bg-primary">{{ e.puntuacion }}/5</span>
+                        </div>
+                        <p class="mb-0 mt-2">{{ e.feedback }}</p>
+                    </article>
+                {% empty %}
+                    <div class="alert alert-info">Sin evaluaciones.</div>
+                {% endfor %}
+            </section>
+        {% endif %}
+    </main>
+
+    <nav class="navbar fixed-bottom bottom-nav">
+        <div class="container app-shell row g-0 text-center">
+            <a class="col {% if seccion == 'info' %}active{% endif %}" href="?seccion=info"><i class="bi bi-person"></i>Perfil</a>
+            <a class="col {% if seccion == 'permisos' %}active{% endif %}" href="?seccion=permisos"><i class="bi bi-calendar"></i>Permisos</a>
+            <a class="col {% if seccion == 'asistencia' %}active{% endif %}" href="?seccion=asistencia"><i class="bi bi-clock"></i>Asistencia</a>
+            <a class="col {% if seccion == 'sueldos' %}active{% endif %}" href="?seccion=sueldos"><i class="bi bi-wallet2"></i>Sueldos</a>
+        </div>
+    </nav>
+
+    <!-- Scripts de Bootstrap y SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Script aislado para manejar la lógica del marcaje de asistencia -->
+    <script src="{% static 'rrhh/js/asistencia.js' %}"></script>
+</body>
+</html>
