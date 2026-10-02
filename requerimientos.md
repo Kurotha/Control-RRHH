@@ -22,7 +22,7 @@
 
 - [x] Desempeño empleados HTML, API mindicator time out
 
-- [ ] Contar dias reales trabajados
+- [x] Contar dias reales trabajados
 
 - [x] Botón marcar asistencia sin feedback
 

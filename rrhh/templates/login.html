@@ -1,19 +1,95 @@
-{% load static %}<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RRHH | Iniciar sesión</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-      rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"><link href="{% static 'rrhh/app.css' %}" rel="stylesheet"></head><body class="pb-4"><header class="app-header sticky-top border-bottom shadow-sm"><div class="container mobile-narrow py-2 d-flex align-items-center gap-2"><div class="brand-box"><i class="bi bi-people-fill"></i></div><div><strong>RRHH Personas</strong><div class="small text-secondary"><span class="status-dot bg-success"></span> Portal corporativo</div></div></div></header><main class="container mobile-narrow py-3"><section class="hero p-4 mb-3 shadow-sm"><span class="badge text-bg-light mb-2"><i class="bi bi-shield-lock-fill me-1"></i>Acceso seguro</span><h1 class="h4 fw-bold">Gestión de personas</h1>
-<p class="mb-0 text-white-50">Ingresa con tus credenciales institucionales para acceder al portal.</p></section><section class="card card-soft"><div class="card-body p-4"><h2 class="h5 fw-bold">Iniciar sesión</h2>
-<p class="text-secondary small">Usa tu RUT sin puntos y tu contraseña.</p>{% if error %}<div class="alert alert-danger py-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}</div>{% endif %}<form action="{% url 'login' %}" method="post">{% csrf_token %}<div class="mb-3"><label class="form-label fw-semibold" for="rutInput">RUT</label><div class="input-group"><span class="input-group-text"><i class="bi bi-person"></i></span><input class="form-control"
-       id="rutInput"
-       name="rut"
-       autocomplete="username"
-       placeholder="12345678-9"
-       required></div></div><div class="mb-3"><label class="form-label fw-semibold" for="passInput">Contraseña</label><div class="input-group"><span class="input-group-text"><i class="bi bi-lock"></i></span><input class="form-control"
-       id="passInput"
-       name="password"
-       type="password"
-       autocomplete="current-password"
-       required><button class="btn btn-outline-secondary"
-        id="togglePasswordBtn"
-        type="button"
-        aria-label="Mostrar contraseña"><i class="bi bi-eye-slash" id="togglePasswordIcon"></i></button></div></div><button class="btn btn-primary w-100 py-2 fw-semibold" type="submit">Ingresar <i class="bi bi-arrow-right ms-1"></i></button></form><div class="alert alert-info border-0 mt-3 mb-0 small"><strong>Primer ingreso:</strong> utiliza la contraseña provisional entregada por RRHH.</div></div></section></main><script>document.getElementById('togglePasswordBtn').addEventListener('click',()=>{const i=document.getElementById('passInput'),x=document.getElementById('togglePasswordIcon'),show=i.type==='password';i.type=show?'text':'password';x.className=show?'bi bi-eye':'bi bi-eye-slash'});</script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script></body></html>
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>RRHH | Iniciar sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'rrhh/app.css' %}" rel="stylesheet">
+</head>
+<body class="pb-4">
+    <header class="app-header sticky-top border-bottom shadow-sm">
+        <div class="container mobile-narrow py-2 d-flex align-items-center gap-2">
+            <div class="brand-box">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div>
+                <strong>RRHH Personas</strong>
+                <div class="small text-secondary">
+                    <span class="status-dot bg-success"></span> Portal corporativo
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mobile-narrow py-3">
+        <section class="hero p-4 mb-3 shadow-sm">
+            <span class="badge text-bg-light mb-2">
+                <i class="bi bi-shield-lock-fill me-1"></i>Acceso seguro
+            </span>
+            <h1 class="h4 fw-bold">Gestión de personas</h1>
+            <p class="mb-0 text-white-50">Ingresa con tus credenciales institucionales para acceder al portal.</p>
+        </section>
+
+        <section class="card card-soft">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold">Iniciar sesión</h2>
+                <p class="text-secondary small">Usa tu RUT sin puntos y tu contraseña.</p>
+                
+                {% if error %}
+                    <div class="alert alert-danger py-2">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+                    </div>
+                {% endif %}
+                
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="rutInput">RUT</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input class="form-control" id="rutInput" name="rut" autocomplete="username" placeholder="12345678-9" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" for="passInput">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input class="form-control" id="passInput" name="password" type="password" autocomplete="current-password" required>
+                            <button class="btn btn-outline-secondary" id="togglePasswordBtn" type="button" aria-label="Mostrar contraseña">
+                                <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit">
+                        Ingresar <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
+                </form>
+                
+                <div class="alert alert-info border-0 mt-3 mb-0 small">
+                    <strong>Primer ingreso:</strong> utiliza la contraseña provisional entregada por RRHH.
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Lógica desacoplada para mostrar/ocultar la contraseña
+        document.getElementById('togglePasswordBtn').addEventListener('click', () => {
+            const input = document.getElementById('passInput');
+            const icon = document.getElementById('togglePasswordIcon');
+            const isPassword = input.type === 'password';
+            
+            input.type = isPassword ? 'text' : 'password';
+            icon.className = isPassword ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
