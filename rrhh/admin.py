@@ -8,6 +8,7 @@ auditorías al interactuar con los datos.
 """
 
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from django.db.models import OuterRef, Subquery
 from .models import (
     Empleado, AuditoriaEmpleado, Departamento, Puesto,
@@ -15,7 +16,7 @@ from .models import (
 )
 
 
-class EmpleadoAdmin(admin.ModelAdmin):
+class EmpleadoAdmin(ModelAdmin):
     """
     Configuración del modelo Empleado en el panel de administración.
     
@@ -136,7 +137,7 @@ class EmpleadoAdmin(admin.ModelAdmin):
             )
 
 
-class AuditoriaEmpleadoAdmin(admin.ModelAdmin):
+class AuditoriaEmpleadoAdmin(ModelAdmin):
     """
     Panel de visualización del historial de auditoría de empleados.
     
@@ -194,13 +195,13 @@ class AuditoriaEmpleadoAdmin(admin.ModelAdmin):
 # Registrar los modelos con sus clases de administración correspondientes
 admin.site.register(Empleado, EmpleadoAdmin)
 admin.site.register(AuditoriaEmpleado, AuditoriaEmpleadoAdmin)
-admin.site.register(Departamento)
-admin.site.register(Puesto)
-admin.site.register(EmpleadoPuesto)
-admin.site.register(Salario)
-admin.site.register(Asistencia)
-admin.site.register(Permiso)
-admin.site.register(Evaluacion)
+admin.site.register(Departamento, ModelAdmin)
+admin.site.register(Puesto, ModelAdmin)
+admin.site.register(EmpleadoPuesto, ModelAdmin)
+admin.site.register(Salario, ModelAdmin)
+admin.site.register(Asistencia, ModelAdmin)
+admin.site.register(Permiso, ModelAdmin)
+admin.site.register(Evaluacion, ModelAdmin)
 
 # Personalización de títulos del Panel de Administración
 admin.site.site_header = "Panel de Control - Gestión de Recursos Humanos"
