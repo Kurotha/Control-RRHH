@@ -126,7 +126,7 @@ Resumen de las tablas:
 - Asistencia: un registro por empleado y día. Los minutos trabajados se calculan solos al guardar.
 - Permiso: solicitudes de ausencia, pendientes, aprobadas o rechazadas. Los días se calculan solos, contando solo días hábiles (sin fines de semana ni feriados).
 - Evaluacion: una por empleado y semestre (formato AAAA-S1 o AAAA-S2), con puntuación de 1 a 5.
-- AuditoriaEmpleado: registro de cambios hechos desde el admin. Solo permite crear registros, no editarlos ni borrarlos.
+- AuditoriaEmpleado: registra desde el admin la creación de empleados y los cambios de nombre o estado. Los registros no se pueden editar ni borrar.
 
 ## Instalación
 
