@@ -29,21 +29,24 @@ class Manejo_fechas:
         Normaliza las fechas ingresadas al formato datetime.
         
         Args:
-            fecha (str | datetime): La fecha a normalizar. Si es string,
+            fecha (str | datetime | date): La fecha a normalizar. Si es string,
                 debe tener el formato 'DD-MM-YYYY HH:MM'.
                 
         Returns:
             datetime: Objeto datetime normalizado.
             
         Raises:
-            TypeError: Si la fecha no es de tipo str o datetime.
+            TypeError: Si la fecha no es de un tipo compatible.
         """
         if isinstance(fecha, str):
             return datetime.strptime(fecha, "%d-%m-%Y %H:%M")
         elif isinstance(fecha, datetime):
             return fecha
+        elif hasattr(fecha, 'year') and not isinstance(fecha, datetime):
+            # Convierte objetos date de Python a datetime al inicio del día
+            return datetime(fecha.year, fecha.month, fecha.day)
         raise TypeError(
-            f"fecha debe ser str o datetime, no {type(fecha).__name__}"
+            f"fecha debe ser str, datetime o date, no {type(fecha).__name__}"
         )
 
     @staticmethod

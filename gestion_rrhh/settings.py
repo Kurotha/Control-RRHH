@@ -33,6 +33,9 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    "unfold",  # <- El nuevo motor Tailwind
+    "unfold.contrib.filters",  # <- Filtros responsivos
+    "unfold.contrib.forms",    # <- Inputs modernos
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -110,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-cl'
 
 TIME_ZONE = 'America/Santiago'
 
@@ -136,3 +139,26 @@ LOGIN_URL = 'login'
 
 # Si falla la verificación CSRF, se muestra el login con un mensaje (ver rrhh/views.py)
 CSRF_FAILURE_VIEW = 'rrhh.views.csrf_fallo'
+
+UNFOLD = {
+    "SITE_TITLE": "Control RRHH",
+    "SITE_HEADER": "Gestión de Personas",
+    "COLORS": {
+        "primary": {
+            "50": "#f5f3ff",
+            "100": "#ede9fe",
+            "200": "#ddd6fe",
+            "300": "#c4b5fd",
+            "400": "#a78bfa",
+            "500": "#8b5cf6",
+            "600": "#7c3aed",  # Morado corporativo principal
+            "700": "#6d28d9",
+            "800": "#5b21b6",
+            "900": "#4c1d95",
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+    },
+}

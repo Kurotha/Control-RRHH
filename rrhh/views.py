@@ -13,6 +13,7 @@ from django.db.models import Prefetch
 
 import numpy as np
 import openpyxl
+import calendar
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -413,9 +414,25 @@ def dashboard_rrhh(request):
     contexto = {'secciones': SECCIONES_RRHH, 'seccion': seccion}
 
     if seccion == 'departamentos':
+        # --- NUEVA LÓGICA: Días hábiles del mes actual ---
+        hoy = timezone.localdate()
+        ultimo_dia = calendar.monthrange(hoy.year, hoy.month)[1]
+        
+        # Generar todos los días del mes actual
+        dias_del_mes = [date(hoy.year, hoy.month, d) for d in range(1, ultimo_dia + 1)]
+        
+        # Obtener feriados del año actual usando tu utilidad
+        feriados_api = Manejo_fechas.feriados(hoy)
+        
+        # Contar días hábiles usando tu propio método estático
+        dias_habiles_mes = Manejo_fechas.contar_dias_habiles(dias_del_mes, feriados_api)
+        contexto['dias_habiles_mes'] = int(dias_habiles_mes)
+        
+        # --- LÓGICA EXISTENTE DE DEPARTAMENTOS ---
         departamentos = []
+        total_empleados_empresa = 0
+        
         for depto in Departamento.objects.select_related('dni_jefe'):
-            # Empleados activos cuyo puesto actual pertenece a este departamento
             asignaciones = EmpleadoPuesto.objects.filter(
                 es_actual=True,
                 dni__estado_empleado=True,
@@ -430,13 +447,18 @@ def dashboard_rrhh(request):
                 }
                 for a in asignaciones
             ]
+            
+            total_empleados_empresa += len(filas)
+            
             departamentos.append({
                 'depto': depto,
                 'filas': filas,
                 'cantidad': len(filas),
                 'total': sum(f['salario'] for f in filas),
             })
+            
         contexto['departamentos'] = departamentos
+        contexto['total_empleados_empresa'] = total_empleados_empresa
 
     elif seccion == 'permisos':
         # Departamento actual de cada empleado (por su puesto vigente)

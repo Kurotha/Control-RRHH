@@ -8,14 +8,29 @@ auditorías al interactuar con los datos.
 """
 
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from django.db.models import OuterRef, Subquery
+from django.db.models.functions import Substr
 from .models import (
     Empleado, AuditoriaEmpleado, Departamento, Puesto,
     EmpleadoPuesto, Salario, Asistencia, Permiso, Evaluacion,
 )
 
 
-class EmpleadoAdmin(admin.ModelAdmin):
+def _clp(valor):
+    """
+    Formatea un monto en pesos chilenos para mostrarlo en el admin.
+
+    Redondea a entero (el peso chileno no usa decimales) y usa punto
+    como separador de miles. Ejemplo: Decimal('1800000.00') -> '$1.800.000'.
+    Si el valor es None devuelve un guion largo.
+    """
+    if valor is None:
+        return "—"
+    return "$" + f"{int(round(valor)):,}".replace(",", ".")
+
+
+class EmpleadoAdmin(ModelAdmin):
     """
     Configuración del modelo Empleado en el panel de administración.
     
@@ -28,8 +43,11 @@ class EmpleadoAdmin(admin.ModelAdmin):
         'nombre_empleado',
         'obtener_departamento',
         'obtener_puesto',
+        'obtener_salario',
         'rol',
-        'estado_empleado'
+        'estado_empleado',
+        'fecha_contratacion',
+        'obtener_ultimo_salario'
     )
     
     list_filter = ('rol', 'estado_empleado')
@@ -56,6 +74,15 @@ class EmpleadoAdmin(admin.ModelAdmin):
             ),
             puesto_orden=Subquery(
                 puesto_activo.values('id_puesto__nombre_puesto')[:1]
+            ),
+            salario_orden=Subquery(
+                puesto_activo.values('id_puesto__salario_base')[:1]
+            ),
+            ultimo_salario_orden=Subquery(
+                Salario.objects.filter(dni=OuterRef('pk'))
+                .annotate(anio=Substr('mes_anio', 4, 4), mes=Substr('mes_anio', 1, 2))
+                .order_by('-anio', '-mes')
+                .values('neto')[:1]
             )
         )
 
@@ -69,6 +96,18 @@ class EmpleadoAdmin(admin.ModelAdmin):
     def obtener_puesto(self, obj):
         """Muestra el puesto usando la columna virtual anotada."""
         return obj.puesto_orden or "Sin puesto asignado"
+
+    @admin.display(description='Salario base', ordering='salario_orden')
+    def obtener_salario(self, obj):
+        """Muestra el salario base del puesto activo."""
+        return _clp(obj.salario_orden)
+
+    @admin.display(description='Último salario (neto)', ordering='ultimo_salario_orden')
+    def obtener_ultimo_salario(self, obj):
+        """Muestra el neto del salario más reciente registrado."""
+        if obj.ultimo_salario_orden is None:
+            return "Sin salarios"
+        return _clp(obj.ultimo_salario_orden)
 
     def save_model(self, request, obj, form, change):
         """
@@ -135,8 +174,7 @@ class EmpleadoAdmin(admin.ModelAdmin):
                 detalles_cambio=detalles_texto
             )
 
-
-class AuditoriaEmpleadoAdmin(admin.ModelAdmin):
+class AuditoriaEmpleadoAdmin(ModelAdmin):
     """
     Panel de visualización del historial de auditoría de empleados.
     
@@ -191,16 +229,84 @@ class AuditoriaEmpleadoAdmin(admin.ModelAdmin):
         return False
 
 
+class DepartamentoAdmin(ModelAdmin):
+    list_display = ('nombre_departamento', 'dni_jefe', 'ver_presupuesto')
+    search_fields = ('nombre_departamento', 'dni_jefe__nombre_empleado')
+
+    @admin.display(description='Presupuesto', ordering='presupuesto')
+    def ver_presupuesto(self, obj):
+        return _clp(obj.presupuesto)
+
+
+class PuestoAdmin(ModelAdmin):
+    list_display = ('nombre_puesto', 'nombre_departamento', 'nivel', 'ver_salario_base')
+    search_fields = ('nombre_puesto',)
+    list_filter = ('nombre_departamento', 'nivel')
+
+    @admin.display(description='Salario base', ordering='salario_base')
+    def ver_salario_base(self, obj):
+        return _clp(obj.salario_base)
+
+
+class EmpleadoPuestoAdmin(ModelAdmin):
+    list_display = ('dni', 'id_puesto', 'fecha_inicio_puesto', 'fecha_fin_puesto', 'es_actual')
+    search_fields = ('dni__dni', 'dni__nombre_empleado', 'id_puesto__nombre_puesto')
+    list_filter = ('es_actual',)
+
+
+class SalarioAdmin(ModelAdmin):
+    list_display = (
+        'dni', 'mes_anio', 'ver_salario_base', 'ver_bonificacion',
+        'ver_descuentos', 'ver_neto', 'pagado'
+    )
+    search_fields = ('dni__dni', 'dni__nombre_empleado', 'mes_anio')
+    list_filter = ('pagado',)
+
+    @admin.display(description='Salario base', ordering='salario_base')
+    def ver_salario_base(self, obj):
+        return _clp(obj.salario_base)
+
+    @admin.display(description='Bonificación', ordering='bonificacion')
+    def ver_bonificacion(self, obj):
+        return _clp(obj.bonificacion)
+
+    @admin.display(description='Descuentos', ordering='descuentos')
+    def ver_descuentos(self, obj):
+        return _clp(obj.descuentos)
+
+    @admin.display(description='Neto', ordering='neto')
+    def ver_neto(self, obj):
+        return _clp(obj.neto)
+
+
+class AsistenciaAdmin(ModelAdmin):
+    list_display = ('dni', 'fecha', 'hora_entrada', 'hora_salida', 'minutos_trabajados', 'estado_asistencia')
+    search_fields = ('dni__dni', 'dni__nombre_empleado')
+    list_filter = ('estado_asistencia', 'fecha')
+
+
+class PermisoAdmin(ModelAdmin):
+    list_display = ('dni', 'tipo', 'fecha_inicio_permiso', 'fecha_fin_permiso', 'dias', 'aprobado')
+    search_fields = ('dni__dni', 'dni__nombre_empleado')
+    list_filter = ('tipo', 'aprobado')
+
+
+class EvaluacionAdmin(ModelAdmin):
+    list_display = ('dni', 'periodo', 'puntuacion')
+    search_fields = ('dni__dni', 'dni__nombre_empleado')
+    list_filter = ('periodo', 'puntuacion')
+
+
 # Registrar los modelos con sus clases de administración correspondientes
 admin.site.register(Empleado, EmpleadoAdmin)
 admin.site.register(AuditoriaEmpleado, AuditoriaEmpleadoAdmin)
-admin.site.register(Departamento)
-admin.site.register(Puesto)
-admin.site.register(EmpleadoPuesto)
-admin.site.register(Salario)
-admin.site.register(Asistencia)
-admin.site.register(Permiso)
-admin.site.register(Evaluacion)
+admin.site.register(Departamento, DepartamentoAdmin)
+admin.site.register(Puesto, PuestoAdmin)
+admin.site.register(EmpleadoPuesto, EmpleadoPuestoAdmin)
+admin.site.register(Salario, SalarioAdmin)
+admin.site.register(Asistencia, AsistenciaAdmin)
+admin.site.register(Permiso, PermisoAdmin)
+admin.site.register(Evaluacion, EvaluacionAdmin)
 
 # Personalización de títulos del Panel de Administración
 admin.site.site_header = "Panel de Control - Gestión de Recursos Humanos"

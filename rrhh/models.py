@@ -241,6 +241,19 @@ class Asistencia(models.Model):
     minutos_trabajados = models.PositiveIntegerField(editable=False, default=0)
     estado_asistencia = models.CharField(max_length=50)
 
+    @property
+    def horas_trabajadas_formateadas(self) -> str:
+        """
+        Convierte los minutos trabajados en un formato de horas y minutos
+        legible para los dashboards (ej: '8h 30m').
+        """
+        if not self.minutos_trabajados:
+            return "0h 0m"
+            
+        horas = self.minutos_trabajados // 60
+        minutos = self.minutos_trabajados % 60
+        return f"{horas}h {minutos}m"
+
     def clean(self):
         """
         Garantiza la coherencia temporal verificando que la hora 
