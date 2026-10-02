@@ -1,0 +1,237 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Jefe</title>
+    <link rel="stylesheet" href="{% static 'rrhh/dashboard.css' %}">
+</head>
+<body>
+<div class="panel">
+
+    <aside class="menu">
+        <h2>Panel del Jefe</h2>
+        <nav>
+            {% for clave, nombre in secciones %}
+            <a href="?seccion={{ clave }}" class="{% if seccion == clave %}activo{% endif %}">{{ nombre }}</a>
+            {% endfor %}
+        </nav>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-salir">Cerrar sesión</button>
+        </form>
+    </aside>
+
+    <main class="contenido">
+
+        {% for mensaje in messages %}
+        <div class="aviso aviso-{{ mensaje.tags }}">{{ mensaje }}</div>
+        {% endfor %}
+
+        {% if seccion == 'equipo' %}
+        <h1>Mi equipo</h1>
+        {% if equipo %}
+        <table>
+            <tr><th>Nombre</th><th>RUT</th></tr>
+            {% for e in equipo %}
+            <tr><td>{{ e.nombre_empleado }}</td><td>{{ e.dni }}</td></tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No tienes empleados a cargo actualmente.</p>
+        {% endif %}
+        {% endif %}
+
+        {% if seccion == 'permisos' %}
+        <h1>Permisos pendientes</h1>
+        {% if permisos_pendientes %}
+        <table>
+            <tr>
+                <th>Empleado</th><th>Tipo</th><th>Desde</th>
+                <th>Hasta</th><th>Días hábiles</th><th>Acción</th>
+            </tr>
+            {% for p in permisos_pendientes %}
+            <tr>
+                <td>{{ p.dni.nombre_empleado }}</td>
+                <td>{{ p.tipo }}</td>
+                <td>{{ p.fecha_inicio_permiso|date:"d-m-Y" }}</td>
+                <td>{{ p.fecha_fin_permiso|date:"d-m-Y" }}</td>
+                <td>{{ p.dias }}</td>
+                <td>
+                    <form method="post" style="display:inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="permiso_id" value="{{ p.pk }}">
+                        <button type="submit" name="accion" value="aprobar" class="btn-aprobar">Aprobar</button>
+                        <button type="submit" name="accion" value="rechazar" class="btn-rechazar">Rechazar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No hay permisos pendientes.</p>
+        {% endif %}
+        {% endif %}
+
+        {% if seccion == 'asistencia' %}
+        <h1>Asistencia del {{ dia|date:"d-m-Y" }}</h1>
+
+        <form method="get" class="filtro-fecha">
+            <input type="hidden" name="seccion" value="asistencia">
+            <label for="fecha">Ver otro día:</label>
+            <input type="date" name="fecha" id="fecha" value="{{ dia|date:'Y-m-d' }}">
+            <button type="submit" class="btn-guardar">Ver</button>
+        </form>
+
+        {% if feriados_fallo %}
+        <div class="aviso aviso-error">No se pudieron consultar los feriados: si este día es feriado, aparecerá como Ausente.</div>
+        {% endif %}
+
+        <table>
+            <tr>
+                <th>Empleado</th><th>Entrada</th><th>Salida</th>
+                <th>Minutos trabajados</th><th>Estado</th>
+            </tr>
+            {% for fila in asistencias %}
+            <tr>
+                <td>{{ fila.empleado.nombre_empleado }}</td>
+                {% if fila.registro %}
+                <td>{{ fila.registro.hora_entrada|time:"H:i"|default:"—" }}</td>
+                <td>{{ fila.registro.hora_salida|time:"H:i"|default:"—" }}</td>
+                <td>{{ fila.registro.minutos_trabajados }}</td>
+                <td>{{ fila.registro.estado_asistencia }}</td>
+                {% else %}
+                <td colspan="3">—</td>
+                <td>{{ sin_registro }}</td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No tienes empleados a cargo actualmente.</td></tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if seccion == 'sueldos' %}
+        <div class="encabezado-con-boton">
+            <h1>Sueldos del equipo</h1>
+            <a href="{% url 'exportar_nomina' %}" class="btn-descargar-excel">
+                <i class="fa-solid fa-file-excel"></i> Descargar Excel
+            </a>
+        </div>
+        {% if sueldos %}
+        <table>
+            <tr>
+                <th>Empleado</th><th>Mes</th><th>Sueldo base</th>
+                <th>Bonificación</th><th>Descuentos</th><th>Neto</th><th>Pagado</th>
+            </tr>
+            {% for fila in sueldos %}
+            <tr>
+                <td>{{ fila.empleado.nombre_empleado }}</td>
+                {% if fila.salario %}
+                <td>{{ fila.salario.mes_anio }}</td>
+                <td>{{ fila.salario.salario_base|floatformat:"0g" }}</td>
+                <td>{{ fila.salario.bonificacion|floatformat:"0g" }}</td>
+                <td>{{ fila.salario.descuentos|floatformat:"0g" }}</td>
+                <td>{{ fila.salario.neto|floatformat:"0g" }}</td>
+                <td>{{ fila.salario.pagado|yesno:"Sí,No" }}</td>
+                {% else %}
+                <td colspan="6">Sin sueldo registrado</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No tienes empleados a cargo actualmente.</p>
+        {% endif %}
+        {% endif %}
+
+        {% if seccion == 'evaluaciones' %}
+        <h1>Evaluaciones de desempeño</h1>
+
+        <div class="pestanas">
+            <a href="?seccion=evaluaciones&amp;vista=nueva" class="{% if vista == 'nueva' %}activa{% endif %}">Nueva evaluación</a>
+            <a href="?seccion=evaluaciones&amp;vista=historial" class="{% if vista == 'historial' or vista == 'editar' %}activa{% endif %}">Historial</a>
+        </div>
+
+        {% if vista == 'nueva' %}
+        <form method="post" class="formulario">
+            {% csrf_token %}
+
+            <label for="dni">Empleado</label>
+            <select name="dni" id="dni" required>
+                <option value="">Selecciona un empleado</option>
+                {% for e in equipo %}
+                <option value="{{ e.dni }}" {% if datos_form.dni == e.dni %}selected{% endif %}>{{ e.nombre_empleado }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="periodo">Período (formato AAAA-S1 o AAAA-S2)</label>
+            <input type="text" name="periodo" id="periodo" placeholder="2026-S2"
+                   value="{{ datos_form.periodo }}" required>
+
+            <label for="puntuacion">Puntuación</label>
+            <select name="puntuacion" id="puntuacion" required>
+                <option value="">Selecciona</option>
+                {% for n in "12345" %}
+                <option value="{{ n }}" {% if datos_form.puntuacion == n %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="feedback">Feedback</label>
+            <textarea name="feedback" id="feedback" rows="5" required>{{ datos_form.feedback }}</textarea>
+
+            <button type="submit" name="accion" value="evaluar" class="btn-guardar">Guardar evaluación</button>
+        </form>
+
+        {% elif vista == 'editar' %}
+        <form method="post" class="formulario">
+            {% csrf_token %}
+            <input type="hidden" name="evaluacion_id" value="{{ evaluacion.pk }}">
+
+            <label>Empleado</label>
+            <input type="text" value="{{ evaluacion.dni.nombre_empleado }}" disabled>
+
+            <label>Período</label>
+            <input type="text" value="{{ evaluacion.periodo }}" disabled>
+
+            <label for="puntuacion">Puntuación</label>
+            <select name="puntuacion" id="puntuacion" required>
+                {% for n in "12345" %}
+                <option value="{{ n }}" {% if evaluacion.puntuacion|stringformat:"s" == n %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="feedback">Feedback</label>
+            <textarea name="feedback" id="feedback" rows="5" required>{{ evaluacion.feedback }}</textarea>
+
+            <button type="submit" name="accion" value="actualizar" class="btn-guardar">Guardar cambios</button>
+            <a href="?seccion=evaluaciones&amp;vista=historial" class="btn-cancelar">Cancelar</a>
+        </form>
+
+        {% else %}
+        {% if evaluaciones %}
+        <table>
+            <tr>
+                <th>Empleado</th><th>Período</th><th>Puntuación</th><th>Feedback</th><th>Acción</th>
+            </tr>
+            {% for ev in evaluaciones %}
+            <tr>
+                <td>{{ ev.dni.nombre_empleado }}</td>
+                <td>{{ ev.periodo }}</td>
+                <td>{{ ev.puntuacion }}/5</td>
+                <td>{{ ev.feedback }}</td>
+                <td><a href="?seccion=evaluaciones&amp;vista=editar&amp;id={{ ev.pk }}" class="btn-editar">Editar</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>Aún no has creado evaluaciones.</p>
+        {% endif %}
+        {% endif %}
+        {% endif %}
+
+    </main>
+</div>
+</body>
+</html>

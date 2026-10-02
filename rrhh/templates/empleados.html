@@ -1,65 +1,275 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Recursos Humanos - Control de Personal</title>
-    <link rel="stylesheet" href="{% static 'rrhh/style.css' %}">
-</head>
+    <title>Gestión de Personal - RRHH</title>
+    <!-- FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5b4bc4;
+            --purple-bg: #1e1b4b;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Barra Superior */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .brand i {
+            font-size: 1.5rem;
+            color: #a855f7;
+        }
+
+        .btn-logout {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
+        }
+
+        /* Tarjeta Principal */
+        .main-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #1e1b4b;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 0.75rem;
+        }
+
+        /* Caja de Resumen */
+        .summary-box {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+            border-left: 5px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .summary-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #4338ca;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e1b4b;
+        }
+
+        .summary-subtext {
+            font-size: 0.85rem;
+            color: #6366f1;
+            margin-top: 0.25rem;
+        }
+
+        /* Tabla */
+        .section-subtitle {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 1rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.85rem 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Badges de Estado Laboral */
+        .badge-activo {
+            background-color: #22c55e !important;
+            color: #ffffff !important;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(34, 197, 94, 0.25);
+        }
+
+        .badge-inactivo {
+            background-color: #94a3b8 !important;
+            color: #ffffff !important;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .text-muted {
+            color: #94a3b8;
+        }
+
+        /* Empleados inactivos en gris tenue */
+        .fila-inactiva td {
+            color: #94a3b8;
+        }
+    </style>
+</head>
 <body>
 
     <div class="container">
-        <h1>Gestión de Personal - Departamento de RRHH</h1>
-
-        <!-- Sección que muestra rápidamente el gasto total en nómina -->
-        <div class="resumen-card">
-            <h2>Gasto Total en Nómina Mensual (Empleados Activos)</h2>
-            <div class="monto">${{ total_nomina|floatformat:2 }} USD</div>
-            <small style="color: #0369a1; display: block; margin-top: 5px;">Tipo de cambio referencial: 1 USD = ${{ tasa_dolar }} CLP</small>
+        <!-- Barra superior -->
+        <div class="top-bar">
+            <div class="brand">
+                <i class="fa-solid fa-users-gear"></i>
+                <span>Gestión de Personas</span>
+            </div>
+            <a href="{% url 'dashboard_rrhh' %}" class="btn-logout">
+                <i class="fa-solid fa-arrow-left"></i>
+                Volver al panel
+            </a>
         </div>
 
-        <h2>Listado de Empleados (Ordenados de Mayor a Menor Salario)</h2>
+        <!-- Contenido Principal -->
+        <div class="main-card">
+            <h1 class="header-title">Gestión de Personal - Departamento de RRHH</h1>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Nombre Completo</th>
-                    <th>Puesto</th>
-                    <th>Salario Mensual</th>
-                    <th>Estado Laboral</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Bucle for exigido por la rúbrica para iterar sobre la lista de empleados -->
-                {% for emp in empleados %}
-                <!-- Condicional if exigido por la rúbrica para aplicar estilos visuales segun estado -->
-                {% if emp.estado_laboral %}
-                <tr class="empleado-activo">
-                    <td>{{ emp.nombre_completo }}</td>
-                    <td>{{ emp.puesto }}</td>
-                    <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
-                    <td><span class="badge badge-activo">Activo</span></td>
-                </tr>
-                {% else %}
-                <tr class="empleado-inactivo">
-                    <td>{{ emp.nombre_completo }}</td>
-                    <td>{{ emp.puesto }}</td>
-                    <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
-                    <td><span class="badge badge-inactivo">Inactivo</span></td>
-                </tr>
-                {% endif %}
-                {% empty %}
-                <tr>
-                    <td colspan="4">No hay empleados registrados en el sistema.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <!-- Cajas de Métricas -->
+            <div class="summary-box">
+                <div class="summary-title">GASTO TOTAL EN NÓMINA MENSUAL (EMPLEADOS ACTIVOS)</div>
+                <div class="summary-value">${{ total_nomina|floatformat:2 }} USD</div>
+                <div class="summary-subtext">Tipo de cambio referencial: 1 USD = ${{ tasa_dolar|floatformat:2 }} CLP</div>
+            </div>
+
+            <!-- Listado de Empleados -->
+            <h2 class="section-subtitle">Listado de Empleados (Ordenados de Mayor a Menor Salario)</h2>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre Completo</th>
+                            <th>Puesto</th>
+                            <th>Salario Mensual</th>
+                            <th>Estado Laboral</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in empleados %}
+                        <tr {% if not emp.estado_empleado %}class="fila-inactiva"{% endif %}>
+                            <td><strong>{{ emp.nombre_empleado }}</strong></td>
+                            <td>{{ emp.nombre_puesto_actual }}</td>
+                            <td>${{ emp.salario_usd|floatformat:2 }} USD</td>
+                            <td>
+                                {% if emp.estado_empleado %}
+                                    <span class="badge-activo">Activo</span>
+                                {% else %}
+                                    <span class="badge-inactivo">Inactivo</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center;" class="text-muted">
+                                No se encontraron registros de empleados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
 </body>
-
 </html>

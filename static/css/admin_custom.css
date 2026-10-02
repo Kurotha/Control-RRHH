@@ -1,0 +1,212 @@
+/* ==============================================================
+   REDISEÑO DEL ADMIN DE DJANGO BASADO EN UI CORPORATIVA
+   ============================================================== */
+
+/* Tipografía y fondo base */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f6fa;
+    color: #1e293b;
+}
+
+/* ============================= */
+/* CABECERA PRINCIPAL (#header)  */
+/* ============================= */
+#header {
+    background-color: #111936;
+    color: #ffffff;
+    padding: 15px 20px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+}
+
+#branding h1 {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* Enlaces de la cabecera (Ver sitio / Cambiar contraseña) */
+#header a:link, 
+#header a:visited {
+    color: #cbd5e1;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+#header a:hover {
+    color: #7c3aed;
+}
+
+/* ============================= */
+/* BARRA DE NAVEGACIÓN (Breadcrumbs) */
+/* ============================= */
+div.breadcrumbs {
+    background-color: #7c3aed;
+    color: white;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+}
+
+div.breadcrumbs a {
+    color: #f5f3ff;
+}
+
+div.breadcrumbs a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* ============================= */
+/* MÓDULOS Y TABLAS PRINCIPALES  */
+/* ============================= */
+.module, 
+#changelist {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+    border: none;
+    overflow: hidden;
+}
+
+/* Cabeceras de los módulos (ej. CONTROL DE RECURSOS HUMANOS) */
+.module h2, 
+.module caption, 
+#changelist-filter h2 {
+    background-color: #f8fafc;
+    color: #111936;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 15px;
+    border-bottom: 2px solid #ede9fe;
+}
+
+/* Línea decorativa morada bajo los títulos de los módulos */
+.module h2::after, 
+.module caption::after {
+    content: "";
+    display: block;
+    width: 38px;
+    height: 4px;
+    margin-top: 8px;
+    background-color: #7c3aed;
+    border-radius: 5px;
+}
+
+/* ============================= */
+/* ESTILOS DE TABLA DE REGISTROS */
+/* ============================= */
+#changelist table thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 2px solid #ede9fe;
+    padding: 12px;
+}
+
+#changelist table tbody td, 
+#changelist table tbody th {
+    color: #334155;
+    font-size: 14px;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 12px;
+}
+
+#changelist table tbody tr:hover td, 
+#changelist table tbody tr:hover th {
+    background-color: #fafaff;
+}
+
+/* ============================= */
+/* BOTONES                       */
+/* ============================= */
+.button, 
+input[type=submit], 
+input[type=button], 
+.submit-row input, 
+a.button {
+    background-color: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button:hover, 
+input[type=submit]:hover, 
+input[type=button]:hover,
+a.button:hover {
+    background-color: #6d28d9;
+}
+
+/* Botón "Añadir" (verde) */
+.addlink {
+    background-color: #16a34a;
+    color: white !important;
+    padding: 7px 13px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.addlink:hover {
+    background-color: #15803d;
+}
+
+/* ============================= */
+/* INPUTS Y BÚSQUEDA             */
+/* ============================= */
+input[type=text], 
+input[type=password], 
+input[type=email], 
+input[type=url], 
+input[type=number], 
+select, 
+textarea {
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1e293b;
+    outline: none;
+}
+
+input[type=text]:focus, 
+select:focus, 
+textarea:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.10);
+}
+
+/* ============================= */
+/* CORRECCIÓN MENÚ LATERAL       */
+/* ============================= */
+#nav-sidebar .current-app .section:link, 
+#nav-sidebar .current-app .section:visited,
+#nav-sidebar .module caption a,
+#nav-sidebar .module caption {
+    color: #111936 !important;
+    font-weight: 700;
+}
+
+#nav-sidebar .current-app .section:hover,
+#nav-sidebar .module caption a:hover {
+    color: #7c3aed !important;
+}
+
+/* Color de los enlaces en los títulos de los módulos del contenido principal */
+.module caption a.section:link,
+.module caption a.section:visited {
+    color: #111936 !important;
+}
+
+.module caption a.section:hover {
+    color: #7c3aed !important;
+}

@@ -1,0 +1,441 @@
+/* ============================= */
+/* CONFIGURACIÓN GENERAL         */
+/* ============================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f8fafc;
+}
+
+
+/* ============================= */
+/* PÁGINA                        */
+/* ============================= */
+
+.pagina-login {
+    min-height: 100vh;
+    display: flex;
+
+    background-image:
+        linear-gradient(
+            rgba(255, 255, 255, 0.35),
+            rgba(255, 255, 255, 0.35)
+        ),
+        url("../img/portada.png");
+    background-size: cover;
+    background-position: center;
+}
+
+
+/* ============================= */
+/* LADO IZQUIERDO                */
+/* ============================= */
+
+.presentacion {
+    width: 62%;
+    padding: 25px 6% 20px;
+
+    display: flex;
+    flex-direction: column;
+
+    color: #0f172a;
+}
+
+
+/* LOGO */
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo > i {
+    font-size: 38px;
+    color: #7c3aed;
+}
+
+.logo h2 {
+    font-size: 27px;
+}
+
+.logo p {
+    margin-top: 2px;
+    color: #475569;
+    font-size: 14px;
+}
+
+
+/* BIENVENIDA */
+
+.bienvenida {
+    margin-top: 15px;
+}
+
+.linea {
+    width: 38px;
+    height: 4px;
+
+    margin-bottom: 15px;
+
+    background-color: #7c3aed;
+    border-radius: 5px;
+}
+
+.bienvenida h1 {
+    max-width: 600px;
+
+    font-size: 48px;
+    line-height: 1.05;
+
+    color: #0f172a;
+}
+
+.bienvenida h1 span {
+    color: #7c3aed;
+}
+
+.bienvenida > p {
+    max-width: 850px;
+
+    margin-top: 15px;
+
+    font-size: 18px;
+    line-height: 1.5;
+
+    color: #0f172a;
+
+    font-weight: 600;
+}
+
+
+/* ============================= */
+/* TARJETAS                      */
+/* ============================= */
+
+.funciones {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-top: 25px;
+}
+
+.tarjeta {
+    min-height: 145px;
+
+    padding: 20px 12px;
+
+    text-align: center;
+
+    background-color: rgba(255, 255, 255, 0.92);
+
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: 14px;
+
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
+}
+
+.tarjeta i {
+    margin-bottom: 12px;
+
+    font-size: 34px;
+
+    color: #7c3aed;
+}
+
+.tarjeta h3 {
+    margin-bottom: 7px;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    color: #0f172a;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 1), 0 1px 8px rgba(255, 255, 255, 1);
+}
+
+.tarjeta p {
+    font-size: 14px;
+    line-height: 1.35;
+
+    color: #334155;
+}
+
+
+/* ============================= */
+/* LADO DERECHO                  */
+/* ============================= */
+
+.contenedor-login {
+    width: 38%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 25px 30px;
+}
+
+
+/* ============================= */
+/* TARJETA LOGIN                 */
+/* ============================= */
+
+.login {
+    width: 100%;
+    max-width: 460px;
+
+    padding: 32px 38px;
+
+    color: white;
+
+    background: rgba(15, 23, 55, 0.94);
+
+    border: 1px solid #8b5cf6;
+    border-radius: 20px;
+
+    box-shadow:
+        0 20px 50px rgba(15, 23, 42, 0.25),
+        0 0 20px rgba(124, 58, 237, 0.18);
+}
+
+.login > h2 {
+    text-align: center;
+
+    font-size: 30px;
+
+    margin-bottom: 8px;
+}
+
+.descripcion {
+    margin-bottom: 25px;
+
+    text-align: center;
+
+    color: #cbd5e1;
+}
+
+
+/* ============================= */
+/* FORMULARIO                    */
+/* ============================= */
+
+form label {
+    display: block;
+
+    margin-top: 17px;
+    margin-bottom: 8px;
+
+    font-weight: bold;
+}
+
+
+/* CAMPOS */
+
+.campo {
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+
+    border: 1px solid #475569;
+    border-radius: 8px;
+
+    background-color: rgba(15, 23, 42, 0.35);
+
+    overflow: hidden;
+}
+
+.icono-campo {
+    width: 60px;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-right: 1px solid #334155;
+
+    font-size: 20px;
+}
+
+.campo input {
+    flex: 1;
+
+    height: 100%;
+
+    padding: 0 18px;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 16px;
+}
+
+.campo input::placeholder {
+    color: #a8b0c0;
+}
+
+.ojo {
+    padding: 20px;
+
+    color: #cbd5e1;
+}
+
+
+/* ============================= */
+/* BOTÓN                         */
+/* ============================= */
+
+button {
+    width: 100%;
+
+    margin-top: 22px;
+
+    padding: 15px 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: linear-gradient(
+        90deg,
+        #8b5cf6,
+        #6d28d9
+    );
+
+    color: white;
+
+    font-size: 17px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+button:hover {
+    background: #6d28d9;
+}
+
+
+/* ============================= */
+/* MENSAJE                       */
+/* ============================= */
+
+.mensaje {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    margin-top: 18px;
+    padding: 14px;
+
+    border: 1px solid #334155;
+    border-radius: 9px;
+
+    background-color: rgba(15, 23, 42, 0.35);
+}
+
+.mensaje i {
+    font-size: 23px;
+    color: #8b5cf6;
+}
+
+.mensaje p {
+    font-size: 14px;
+    line-height: 1.5;
+
+    color: #e2e8f0;
+}
+
+
+/* ============================= */
+/* RESPONSIVE                    */
+/* ============================= */
+
+@media (max-width: 1000px) {
+
+    .pagina-login {
+        flex-direction: column;
+    }
+
+    .presentacion,
+    .contenedor-login {
+        width: 100%;
+    }
+
+    /* En pantallas chicas: marca, luego login, luego tarjetas */
+    .presentacion {
+        display: contents;
+    }
+
+    .logo,
+    .bienvenida,
+    .funciones {
+        padding-left: 6%;
+        padding-right: 6%;
+    }
+
+    .logo {
+        order: 1;
+        padding-top: 25px;
+    }
+
+    .bienvenida {
+        order: 2;
+    }
+
+    .contenedor-login {
+        order: 3;
+    }
+
+    .funciones {
+        order: 4;
+        padding-bottom: 20px;
+    }
+
+    .funciones {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .presentacion {
+        padding: 30px;
+    }
+
+    .bienvenida h1 {
+        font-size: 38px;
+    }
+
+    .funciones {
+        grid-template-columns: 1fr;
+    }
+
+    .contenedor-login {
+        padding: 30px 20px;
+    }
+
+    .login {
+        padding: 30px 25px;
+    }
+
+}
