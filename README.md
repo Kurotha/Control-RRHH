@@ -16,7 +16,9 @@ Crear, editar y eliminar registros se hace desde el admin de Django (/admin/). L
 
 ## Tecnologías
 
-Python 3.12, Django 4.2, PostgreSQL, openpyxl, numpy, requests y python-dotenv.
+* **Backend & Base de Datos:** Python 3.13, Django 6.1, PostgreSQL (Supabase), django-unfold.
+* **Frontend & UI:** HTML5, CSS3, JavaScript Vanilla, Bootstrap 5.3, Bootstrap Icons, SweetAlert2.
+* **Librerías & Utilidades:** numpy, openpyxl, requests, python-dotenv.
 
 ## Modelo de datos
 
